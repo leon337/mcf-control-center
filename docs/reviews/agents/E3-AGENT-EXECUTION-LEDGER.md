@@ -13,6 +13,7 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Prefer routes explicitly labeled `Free` by the local Harness catalog.
 - A `Free` catalog label does not prove a particular remaining quota; no paid route is intentionally selected in E3.
 - Agent output is evidence input, not automatic truth; MESTRE reconciles and Emily audits.
+- Visual evidence is mandatory per agent call: pre-call/active-session identity plus post-delivery evidence, tied to Harness session metadata and SHA-256 snapshots.
 
 ## Invalidated attempt
 
@@ -34,6 +35,9 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Material findings: 2 blockers, 5 non-blockers
 - Review: `SOFIA-E3-ARCHITECTURE-REVIEW.md`
 - Review SHA-256: `64fa513ab61111d9e9c72368567716ad1aec1b87c756aa480b3a12ca5c1f30d4`
+- Visual evidence: `docs/evidence/agents/SOFIA-E3-HARNESS-VISUAL.png`
+- Harness snapshot: `docs/evidence/agents/SOFIA-E3-HARNESS-SNAPSHOT.json`
+- Snapshot SHA-256: `4535d21a740f3ed18fe1a065d2706ef24684537efb1b6bb43889eed3a75889a2`
 
 ## RAFAEL
 
@@ -45,6 +49,9 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Catalog label: `DeepSeek V4 Flash 0731 — NVIDIA Free Endpoint`
 - Input includes Sofia's completed architecture review.
 - Status: running / engineering review
+- Active visual evidence: `docs/evidence/agents/RAFAEL-E3-HARNESS-VISUAL.png`
+- Harness snapshot: `docs/evidence/agents/RAFAEL-E3-HARNESS-SNAPSHOT.json`
+- Snapshot SHA-256: `d57d77ac8bbd138115caa1863428db0a54e5d7e7800db157d0fa2928a2ae2a64`
 
 ## RICARDO / EMILY
 

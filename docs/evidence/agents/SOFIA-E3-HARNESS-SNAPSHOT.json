@@ -1,0 +1,17 @@
+{
+  "captured_at_utc": "2026-09-02T20:14:09.901788+00:00",
+  "mission": "MCF-CONTROL-CENTER-001 / E3",
+  "agent": "SOFIA",
+  "session_id": "session-225e0961-143a-4392-8680-92f8b9fa7d98",
+  "cwd": "/tmp/mcf-control-center-e3",
+  "agent_preset": "mcf-sofia",
+  "title": "SOFIA — MCF-CONTROL-CENTER-001 — E3",
+  "running": false,
+  "provider": "nine-router-kiro",
+  "model": "kr/claude-sonnet-4.5",
+  "request_header_seq": 11,
+  "last_assistant_message_seq": 1881,
+  "last_assistant_text_excerpt": "# REVISÃO ARQUITETURAL — MCF CONTROL CENTER E3\n\n**Arquiteta:** SOFIA  \n**Data:** 2026-09-02T19:57:57Z  \n**Artefatos analisados:**\n- `/tmp/mcf-control-center-e3/source/E3-CONTROL-CENTER-ARCHITECTURE.md`\n- `/tmp/mcf-control-center-e3/source/MCF-CONTROL-EVENT-v1.md`\n- `/tmp/mcf-control-center-e3/agents/SOFIA.md`\n\n---\n\n## 1. VEREDITO — **APROVADA COM CORREÇÕES**\n\nA arquitetura proposta é estruturalmente sólida e alinhada com os princípios de event sourcing, separação de fontes de verdade e portabili",
+  "prompt_sha256": "3f6e75e351ff85fbf921f4de5e61092b82b2d706d6e9d14582cd8a5ff995b7ca",
+  "history_as_of_seq": 1883
+}
