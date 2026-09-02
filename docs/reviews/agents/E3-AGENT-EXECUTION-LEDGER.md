@@ -119,3 +119,26 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Output SHA-256: `94f5e0c658d4a107341892ef95f2906e5c93bc2f37aa9e9dc91e6d2d7a39abc8`.
 - Disposition: `LEGACY PRE-PATTERN-B — completed but excluded from the Pattern B canonical reconciliation chain`.
 - Reason: the session predates the approved persistent workspace-per-agent+mission topology. Its findings may be consulted as historical evidence, but the canonical post-migration SOFIA review will be re-run in the isolated Pattern B workspace.
+
+## SOFIA — E3C Pattern B permission-gate incident
+
+- Transient session: `session-a48ef80d-bfe7-45d9-8f9b-b64221dd81bb`.
+- Workspace: `MCF-CONTROL-CENTER-001 — SOFIA`.
+- Preset: `mcf-sofia`.
+- Disposition: `INVALID — permission command misrouted through session.prompt`.
+- The attempted `/permission read-only` was incorrectly sent as prompt content; the gate detected `blank=false` and `permission=workspace-write` before the actual SOFIA task.
+- No E3C cognitive task was sent to that session and none of its output is accepted.
+- The transient session later disappeared from `session.list`; incident evidence is preserved as `SOFIA-E3C-PATTERN-B-INVALID-PERMISSION-MISROUTE.json`.
+
+## SOFIA — E3C Pattern B canonical retry (prepared)
+
+- Session: `session-7c6fe628-cbe2-4d14-b493-2d82b1686a84`.
+- Workspace ID: `81cc5ad0-e681-4fb9-b4ab-b5cc91a80faa`.
+- Workspace path: `/var/tmp/mcf-control-center-001/sofia`.
+- Preset: `mcf-sofia`.
+- Permission: `read-only`, applied through the Host `commands/execute` RPC while the session remained blank.
+- Provider/model: `nine-router-kiro / kr/claude-sonnet-4.5`.
+- Pre-prompt gate: `blank=true`, `running=false`, no `user/message`, no `assistant/message`, correct workspace membership.
+- Pre-call evidence: `docs/evidence/agents/SOFIA-E3C-PATTERN-B-SNAPSHOT-BEFORE.json` + `SOFIA-E3C-PATTERN-B-VISUAL-BEFORE.png`.
+- Prompt evidence: `docs/evidence/agents/SOFIA-E3C-PATTERN-B-PROMPT.txt` (SHA recorded in snapshot).
+- Status at this ledger checkpoint: `PREPARED — prompt not yet sent`.

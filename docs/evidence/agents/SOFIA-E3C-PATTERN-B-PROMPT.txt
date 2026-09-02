@@ -1,0 +1,17 @@
+SOFIA — MCF-CONTROL-CENTER-001 — E3C PATTERN B
+
+Você é SOFIA sob o preset canônico `mcf-sofia`. Esta é uma revisão arquitetural read-only. Não crie, edite ou apague arquivos e não solicite permissão de escrita. Entregue todo o parecer no chat.
+
+Fonte de contexto autorizada: SOMENTE os arquivos existentes sob `input/` deste workspace e este prompt. Não use contexto de outros workspaces/sessões como evidência.
+
+Tarefa:
+1. Leia integralmente `input/00-MISSION.md`, `input/10-BASELINE.md`, `input/20-HANDOFF.md` e todos os arquivos em `input/sources/`.
+2. Revise criticamente `LEO-E3-PROJECTION-SEMANTICS.md` contra as fontes reais do Runtime incluídas no pacote, sem presumir que LÉO esteja correto.
+3. Para cada afirmação material do parecer de LÉO, classifique como `ACEITA`, `REJEITADA` ou `CORRIGIDA`, citando o nome do arquivo-fonte e o símbolo/DDL/trecho técnico que sustenta a decisão.
+4. Verifique obrigatoriamente: PK/ordenação de `mcf_events`; semântica de `sequence` e `idempotency_key`; papel de `mission.version`; duplicate/out-of-order; LIVE/STALE/DEGRADED; projeções; TTL/particionamento; campos propostos para o envelope; snapshots e handoffs.
+5. Separe claramente o que está comprovado pelo Runtime do que é decisão de arquitetura do Control Center.
+6. Identifique qualquer afirmação do parecer de LÉO que extrapole as fontes ou possa causar perda de eventos, corrupção de projeção ou falsa classificação LIVE/STALE.
+7. Proponha as correções mínimas necessárias em `E3-CONTROL-CENTER-ARCHITECTURE.md` e `MCF-CONTROL-EVENT-v1.md`, mas NÃO implemente as alterações.
+8. Termine com: veredito (`APROVAR`, `APROVAR COM CORREÇÕES` ou `REPROVAR`), blockers para fechar E3, e handoff objetivo para RAFAEL e MESTRE.
+
+Regras: read-only; sem escrita; sem alteração de código; sem resposta decorativa; toda conclusão material deve ser rastreável às fontes do pacote.
