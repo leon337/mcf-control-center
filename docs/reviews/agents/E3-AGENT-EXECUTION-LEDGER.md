@@ -68,11 +68,19 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - `session-fbbf4293-dba9-40ca-b565-5a7334ae0b01` — prepared blank session; renamed `UNUSED — RICARDO prepared before Rafael handoff`.
 - `session-a7f7588a-c41b-4b6e-aa96-563d6ad8ba1e` — **INVALIDATED and cancelled** after provenance check proved its handoff used Rafael's alternate `session-648` review instead of the official `session-339` output.
 - The invalidated call is retained as evidence of the detected provenance mismatch; none of its output is accepted in the mission chain.
-- Next action: create a fresh `mcf-ricardo` session with the corrected official Rafael review and new pre-handoff visual evidence.
+- Official corrected session: `session-1309a6bd-e33f-490b-8afa-d2b3783f430b`
+- Preset: `mcf-ricardo`
+- Provider: `z-ai`
+- Model: `glm-4.7-flash` (`GLM-4.7 Flash — Free`)
+- Workspace: `/tmp/mcf-control-center-e3-ricardo-v3` (source files OS-read-only)
+- Official Rafael input SHA-256: `bbe49a48ffceee9ad6a31660d27c9b7312fe7bdf29f08bd569564c8d88b66be0`
+- Prompt SHA-256: `b9151a12bd6cd2305a0f771fa9c3183ab1941af033eb337f371583171cebfae0`
+- Pre-handoff snapshot: `docs/evidence/agents/RICARDO-E3-HARNESS-SNAPSHOT-BEFORE-OFFICIAL.json`
+- Pre-handoff visual: `docs/evidence/agents/RICARDO-E3-HARNESS-VISUAL-BEFORE-OFFICIAL.png`
+- Status: `running` — official security review after corrected Rafael handoff.
 
 ## EMILY
 
 - Prepared blank session: `session-097431f9-f27b-49e4-8aff-348ebc341be7` (`mcf-emily`).
 - No mission prompt accepted yet in the current chain.
 - Emily will only be dispatched after Ricardo's corrected handoff is completed and evidenced.
-
