@@ -1,0 +1,17 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B",
+  "agent": "EMILY",
+  "canonical": true,
+  "sessionId": "session-bb36307a-5935-4c3e-ae3f-67938df0a87f",
+  "preset": "mcf-emily",
+  "title": "EMILY — MCF-CONTROL-CENTER-001 — E3 — OFFICIAL INDEPENDENT AUDIT",
+  "running": false,
+  "blank": true,
+  "cwd": "/tmp/mcf-control-center-e3-emily-v1",
+  "provider": "z-ai",
+  "model": "glm-4.5-flash",
+  "promptSent": false,
+  "priorAbortedSession": "session-eb7d85d7-8ef0-4b98-bbd3-75d6e1b080f2",
+  "priorFailure": "NVIDIA MiniMax M3 HTTP 429 RATE_LIMIT after 5 retries"
+}

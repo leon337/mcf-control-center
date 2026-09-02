@@ -89,6 +89,14 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 
 ## EMILY
 
-- Prepared blank session: `session-097431f9-f27b-49e4-8aff-348ebc341be7` (`mcf-emily`).
-- No mission prompt accepted yet in the current chain.
-- Emily will only be dispatched after Ricardo's corrected handoff is completed and evidenced.
+- Prepared blank session: `session-097431f9-f27b-49e4-8aff-348ebc341be7` (`mcf-emily`) — not used.
+- First audit attempt: `session-eb7d85d7-8ef0-4b98-bbd3-75d6e1b080f2`, preset `mcf-emily`, provider/model `nvidia-nim / minimaxai/minimax-m3`.
+- Disposition of first attempt: `ABORTED — RATE_LIMIT`; NVIDIA returned HTTP 429 for all 5 automatic retries before any audit verdict. No output from that session is accepted as an Emily opinion.
+- Official retry session: `session-bb36307a-5935-4c3e-ae3f-67938df0a87f`.
+- Preset: `mcf-emily`.
+- Provider/model: `z-ai / glm-4.5-flash` (`GLM-4.5 Flash — Free`).
+- Workspace: `/tmp/mcf-control-center-e3-emily-v1` (OS-read-only).
+- Inputs include canonical Sofia, Rafael and Ricardo reviews plus this execution ledger.
+- Official pre-handoff snapshot: `docs/evidence/agents/EMILY-E3-HARNESS-SNAPSHOT-BEFORE-OFFICIAL.json`.
+- Official pre-handoff visual: `docs/evidence/agents/EMILY-E3-HARNESS-VISUAL-BEFORE-OFFICIAL.png`.
+- Status: prepared; prompt not yet sent at this checkpoint.
