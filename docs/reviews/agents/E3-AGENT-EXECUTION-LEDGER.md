@@ -99,4 +99,11 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Inputs include canonical Sofia, Rafael and Ricardo reviews plus this execution ledger.
 - Official pre-handoff snapshot: `docs/evidence/agents/EMILY-E3-HARNESS-SNAPSHOT-BEFORE-OFFICIAL.json`.
 - Official pre-handoff visual: `docs/evidence/agents/EMILY-E3-HARNESS-VISUAL-BEFORE-OFFICIAL.png`.
-- Status: prepared; prompt not yet sent at this checkpoint.
+- Status: `completed` — official independent audit.
+- Official audit: `docs/reviews/agents/EMILY-E3-INDEPENDENT-AUDIT.md`.
+- Official audit SHA-256: `b520597bf03d2bdf1b690943e42fb18b395d2c2bfc6863a4fda1770f703fadb4`.
+- Final assistant event seq: `3681`.
+- Verdict: `LIBERAR E3 COM REMEDIAÇÃO`.
+- Final Harness snapshot: `docs/evidence/agents/EMILY-E3-HARNESS-SNAPSHOT-FINAL.json`.
+- Final visual evidence: `docs/evidence/agents/EMILY-E3-HARNESS-VISUAL-FINAL.png`.
+- Independence limitation recorded: same Harness/executor, different canonical preset and model; no claim of fully independent infrastructure.
