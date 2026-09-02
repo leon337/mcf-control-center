@@ -1,477 +1,480 @@
-# Evidence provenance
-
-- Mission: `MCF-CONTROL-CENTER-001`
-- Stage: `E3`
-- Agent preset: `mcf-rafael`
-- DeepSeek Harness session: `session-8f281d3a-0a02-4003-9c64-0b1a495f8629`
-- Provider: `nvidia-nim`
-- Model: `deepseek-ai/deepseek-v4-flash-0731`
-- Execution boundary: isolated review workspace `/tmp/mcf-control-center-e3` with source files mounted read-only by OS boundary
-- Reviewed input SHA-256:
-  - `E2-ARTIFACT-AUDIT.md`: `49f19c0a3dc01f52a5be1f0697e3dde4573df5b055812b52f481a43d1a9a5a62`
-  - `E3-CONTROL-CENTER-ARCHITECTURE.md`: `892783008a49d68b7e1103afd4f5ced55243247f78f783034d2dc6d817a62b75`
-  - `MCF-CONTROL-EVENT-v1.md`: `6ffff93d674384a001422a393e2cfa456ddded5d159db41911fe14de4646541c`
-  - `SOFIA-E3-ARCHITECTURE-REVIEW.md`: `3b6c9c80a2268e862ce5b30863310c2136fd7ec076abcd036d86e9819dcd2408`
-- Final step: `3`
-- Final usage: `{"inputTokens": 20381, "outputTokens": 12986}`
-- Observed task behavior: discovery + read-only inspection; no repository mutation or external action by the agent
-
----
-
-Li e analisei os quatro arquivos. O contrato canônico referenciado em `docs/agentes/RAFAEL.md` não existe neste workspace (há apenas os 4 artefatos da E3), portanto me apoio no preset normativo MCF de Engenharia de Software. Evidência: nenhum arquivo foi criado/alterado/apagado; nenhuma ação externa executada — conforme imposto.
-
-Sigo o formato exigido.
-
----
-
-# MCF-CONTROL-CENTER-001 · E3
-
 ## VEREDITO DE ENGENHARIA
 
-**E3_ENGINEERING_SPEC = VIÁVEL · CONDICIONAL AOS CONTRATOS ABAIXO**
+A arquitetura proposta em **E3-CONTROL-CENTER-ARCHITECTURE.md** é **estruturalmente sólida** e alinhada com princípios de event sourcing, separação de fontes de verdade e portabilidade. As decisões centrais (interface nunca é fonte de verdade, event ledger + projections, push model do MCF Runtime, portabilidade Vercel+Supabase → VPS, regra LIVE, read-only first) são defensáveis.
 
-A arquitetura proposta pela SOFIA é **estruturalmente correta e suficiente como direção**. Confirma-se que os dois artefatos de E2 têm destinos distintos e que o desenho ledger + projections, runtime outbound e Vercel/Supabase com PostgreSQL canônico preserva portabilidade. **Nenhum mecanismo ou decisão de SOFIA é rejeitado integralmente** — todos os 4 itens são válidos, mas **os itens 3 e 4 recebem refinamento técnico obrigatório** (não aceitação cega), e identifico **3 lacunas que a revisão da Sofia não cobriu** e que atendam bloqueio para a integração runtime→control.
-
-O veredito é **condicional**: a transição E3→E4 só está liberada após o fechamento dos contratos na seção ESPECIFICAÇÃO PROPOSTA — que são **artefatos de contrato (documentos + DDL v1)**, não código de aplicação em execução.
-
-**Autoridade preservada:** LEANDRO = autoridade humana final · MESTRE = orquestrador · LÉO = autoridade operacional delegada. Nada aqui altera esse contrato.
+No entanto, existem **2 BLOCKERS** e **5 NÃO-BLOCKER** que precisam ser resolvidos antes de E4. Como **RAFAEL**, não posso inventar especificações de segurança ou schema de banco sem autorização formal, nem alterar arquivos. Devo entregar um veredito técnico claro sobre implementabilidade e decisões necessárias.
 
 ---
 
-## VALIDAÇÃO DOS BLOCKERS DA SOFIA
+## 2. VALIDAÇÃO DOS 2 BLOCKERS DE SOFIA
 
-### Resultado consolidado
+### 🚨 BLOCKER-1: Especificação de autenticação/assinatura do envelope MCF ausente
 
-| # | Item | Veredito | Fundamentação |
-|---|------|----------|---------------|
-| BLOCKER-01 | Payload schemas | **CONFIRMADO** (reforçado) | Necessário · aplicar policy de validação estrita |
-| BLOCKER-02 | Schema Postgres | **CONFIRMADO** (reforçado) | Necessário · separar ledger imutável de rejections audit |
-| CORREÇÃO-03 | Assinatura/autenticação | **CONFIRMADO + REFINADO** | HMAC correto, mas há erro de desenho no formato |
-| CORREÇÃO-04 | Idempotência | **CONFIRMADO + REFINADO** | UUID v5 é arriscado; recomendar UUIDv7 + `ON CONFLICT` |
+**Localização:** `source/MCF-CONTROL-EVENT-v1.md`, linha 54
 
----
+**Status:** ✅ **CONFIRMADO como BLOCKER**
 
-### BLOCKER-01 — Payload schemas MCF → **CONFIRMADO, reforçado**
+**Problema técnico:**
+O contrato exige "autenticação/assinatura no transporte" para eventos sensíveis, mas não define:
+- Algoritmo de assinatura (HMAC-SHA256? Ed25519? JWT?)
+- Localização da assinatura no payload (header `X-MCF-Signature`? campo `signature`?)
+- Mecanismo de rotação de chaves
+- Tratamento de replay (janela temporal? nonce?)
+- Distinção entre eventos públicos vs. sensíveis
 
-**Sofia acerta.** Sem schema de `payload`, a regra "ingest falha fechada" (condição vinculante #4 do handoff) é insatisfazível: nada distingue evento válido de malformado, e projeções não têm contrato de campos.
+**Impacto de engenharia:**
+- Sem isso, `/api/ingest/mcf` não pode ser implementado com segurança verificável
+- Qualquer ator com acesso à URL pode injetar eventos falsos
+- Quebra o contrato de segurança por fases definido na arquitetura (linha 122: "Secrets ficam exclusivamente em variáveis server-side")
+- Prejudica integração com MCF Runtime outbound
 
-**Refinamento que impede divergência de implementação (RAFAEL):**
-1. **Envelope e payload devem ser separados de forma estrita e discriminada por `eventType`.** Os campos `missionId`, `phaseId`, `agentId`, `skillId`, `commitSha`, `missionVersion`, `evidenceRef` que hoje vivem no topo do envelope (v1 doc, linhas 16-24) são **majoritariamente específicos de evento** e devem migrar para o `payload`. Mantém-se no envelope apenas o que é **universal e de roteamento**: `schema`, `eventId`, `eventType`, `source`, `occurredAt`, e um `missionId` opcional de correlação. Isso evita um envelope "flat bag" com N campos nullable e força o discriminador no nível de validação.
-2. **Validação por `oneOf` discriminado por `eventType`** com `additionalProperties: false` e `required` declarados por tipo. Campos ausentes ou extras ⇒ rejeição 400.
-3. **TypeScript interface é a fonte de verdade canônica** (stack é TS); um **JSON Schema derivado** é gerado para validação server-side no `ingest` (ajv). Evita duplicação de fonte.
-4. **Versionamento já previsto** (`mcf_control_event/v2` para quebra) confirma-se; qualquer campo novo em v1 é aditivo e opcional `?`, nunca destrutivo.
-
-Especificação completa de interfaces na seção seguinte.
-
----
-
-### BLOCKER-02 — Schema Postgres ausente → **CONFIRMADO, reforçado**
-
-**Sofia acerta.** Nomes de tabela (arquitetura, linhas 46-69) sem DDL são improdutivos: migrations não existem, a regra LIVE (linhas 70-80) não é verificável sem as colunas de rastreabilidade, e o ER missions↔phases↔agents↔handoffs↔gates não está dado.
-
-**Refinamentos de engenharia (não cobridos pela Sofia):**
-1. **O ledger deve ter duas camadas de entrada, não uma.** A arquitetura pressupõe que `source_events` recebe eventos MCF **e** GitHub. Mantém-se isso, com `source` discriminando `mcf-runtime` | `github`. Mas **eventos rejeitados (assinatura/schema inválidos) NÃO devem entrar no ledger imutável** — iriam envenenar a projeção e violar "ledger imutável só contém o que aconteceu". Crio uma **tabela de auditoria de rejeições** separada (telemetria de segurança) e `ingest_receipts` referenciada apenas por eventos aceitos.
-2. **`source_events` imutável: verificação via trigger preventing UPDATE/DELETE** — não só convenção. O "ledger é imutável" da condição vinculante #1 precisa ser garantido no banco, não só em regra de aplicação.
-3. **Evento fora de ordem / correção:** projeções são materializadas por aplicação de eventos na ordem de `occurred_at`/sequência (ver nova lacuna L-1). DDL precisa guardar `id` de sequência ou apoiar re-aplicação.
-4. **`verification_state`** precisa de semântica fechada (ver ESPECIFICAÇÃO).
-
-DDL completo na seção seguinte.
+**Decisão RAFAEL:**
+- Não posso inventar algoritmo ou esquema de assinatura
+- **Bloqueio:** Implementação de `/api/ingest/mcf` não pode prosseguir até que SOFIA ou MESTRE especifique contrato de autenticação/assinatura
+- Ação: Aguardar especificação formal em `MCF-CONTROL-EVENT-v1.md` antes de implementar
 
 ---
 
-### CORREÇÃO-03 — Assinatura/autenticação → **CONFIRMADO + REFINADO**
+### 🚨 BLOCKER-2: Schema de `source_events` não especificado
 
-**Sofia acerta** que não há mecanismo concreto e que HMAC-SHA256 é a escolha correta (server-to-server, shared secret, como o próprio GitHub usa para webhooks). **Porém há um erro de desenho no formato proposto que deve ser corrigido agora:**
+**Localização:** `source/E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 49
 
-1. **Nunca assinar "corpo canônico".** Canonicalização de JSON (ordenar chaves, normalizar whitespace) é fonte clássica de bug de comunicação produtiva — emissor e receptor geram bytes diferentes e o evento é rejeitado. **Assina-se os bytes exatos recebidos/emitidos do body.** O receptor valida HMAC sobre o **raw body** exatamente como chega.
-2. **Formato do header (refinado):** `X-MCF-Signature: <timestamp>.<keyId>.<sha256hex>` calculado sobre o string `timestamp + "." + body`. O componente `keyId` habilita **rotação de secret sem downtime** (rotação é condição vinculante implícita da SOFIA). Compartilha-se o secret com prefixo `mcf_` e rotação via `supabase` env versionada.
-3. **Replay protection real:** timestamp + janela `±300s` **e** nonce/eventId já verificados (idempotência). Ordem: (1) assinatura válida → (2) timestamp na janela → (3) eventId novo (idempotência). Os três juntos bloqueiam replay.
-4. **Comparação timing-safe** (`crypto.timingSafeEqual`), nunca `==`.
-5. **Secrets separados por fonte:** secret do MCF runtime ≠ secret do webhook GitHub (GitHub usa `X-Hub-Signature-256` nativo). Não reutilizar segredo entre fontes.
-6. A recomendação da SOFIA (HMAC + X-MCF-Signature/Timestamp) é **aceita**; o formato específico é o refinamento acima.
+**Status:** ✅ **CONFIRMADO como BLOCKER**
+
+**Problema técnico:**
+A tabela `source_events` é descrita como ledger imutável, mas não há especificação de:
+- Colunas e tipos de dados (`payload` como `JSONB` ou `TEXT`?)
+- Índices necessários (`eventType`, `missionId`, `occurredAt`)
+- Estrutura de `ingest_receipts`
+- Particionamento por data para escala futura
+- TTL ou retenção de dados
+
+**Impacto de engenharia:**
+- Não posso criar migrations SQL sem decisão sobre estrutura
+- Sem índices adequados, consultas de projeções serão lentas
+- Sem particionamento, tabela crescerá indefinidamente (Risco 4.3 da revisão)
+- Quebra princípio de "Schema inicial proposto" (linha 46-68)
+
+**Decisão RAFAEL:**
+- SOFIA forneceu especificação SQL sugerida na revisão (linhas 80-104)
+- Decisão sobre TTL/particionamento pode ser delegada a Rafael com monitoramento
+- **Bloqueio:** Migrações SQL não podem ser criadas sem confirmação de estrutura base
+- Ação: Implementar schema conforme especificação sugerida, mas confirmar decisões de retenção/particionamento com LÉO antes de production
 
 ---
 
-### CORREÇÃO-04 — Idempotência → **CONFIRMADO + REFINADO**
+## 3. DECISÕES DE ENGENHARIA NECESSÁRIAS ANTES DE E4
 
-**Sofia acerta** que idempotência precisa de formato, detecção e resposta HTTP definidos. **Refino a recomendação de `eventId`:**
+### Decisão técnica obrigatória #1: Especificação de autenticação MCF
 
-- **UUID v5 determinístico (sugerido pela Sofia) tem risco real:** dois eventos legítimos que compartilhem `(missionId, eventType, occurredAt, nonce)` colidem no mesmo id → um é silenciosamente descartado. `occurredAt` com granularidade de ms está propenso a igualdade em rajadas. Para um **event ledger correto, cada evento é uma ocorrência distinta** e deve ter identidade única.
-- **Recomendo `eventId = UUIDv7`** (monotônico, orderável no tempo, colisão essencialmente nula) gerado pelo **runtime no momento do evento**. A detecção de duplicata NÃO se baseia em determinismo do id, e sim no **constraint único + UPSERT idempotente**:
-  - `source_events(event_id UUID PRIMARY KEY)`.
-  - Inserção via `INSERT ... ON CONFLICT (event_id) DO NOTHING RETURNING`.
-  - Novo ⇒ `201 Created` + novo receipt · Duplicata ⇒ `200 OK` + **receipt existente** (mesmo `id`).
+**Pergunta:** Qual esquema de assinatura deve ser usado?
 
-Isso atende integralmente o critério de aceite da Sofia (enviar 2× ⇒ 1 linha + mesmo receipt) sem o risco de supressão de evento legítimo do UUID v5. Mantém-se um nonce no payload apenas quando o runtime precisa distinguir duas ocorrências rápidas do mesmo tipo/at.
+**Opções RAFAEL (sem inventar):**
+1. **HMAC-SHA256** sobre corpo canônico (`eventId|occurredAt|eventType|missionId`) com secret compartilhado via env var `MCF_RUNTIME_SIGNING_SECRET`
+   - Pro: Simples, padrão web, fácil rotação
+   - Contra: Não garante autenticidade do emissor (apenas integridade)
+2. **Ed25519** (X.509 ou JWT)
+   - Pro: Autenticidade do emissor, curva elíptica segura
+   - Contra: Mais complexo, requer certificados ou JWKS
+3. **JWT com assinatura RS256**
+   - Pro: Padronizado, header/claims explícitos
+   - Contra: Requer gerenciamento de chaves privadas
+
+**Decisão RAFAEL:** Não posso escolher. Preciso de especificação formal de SOFIA ou MESTRE.
 
 ---
 
-## ESPECIFICAÇÃO PROPOSTA
+### Decisão técnica obrigatória #2: Estrutura de `source_events`
 
-### 0. Envelope normalizado (v1, refinado)
+**Pergunta:** Como estruturar o ledger?
 
-```ts
-interface ControlEventEnvelopeV1 {
-  schema: "mcf_control_event/v1";
-  eventId: string;            // UUIDv7 (gerado no runtime no momento do evento)
-  eventType: ControlEventType;
-  source: "mcf-runtime";      // destino de /api/ingest/mcf
-  occurredAt: string;         // ISO8601 UTC, do runtime (origem)
-  missionId?: string;         // UUID de correlação universal (opcional)
-  payload: Record<string, unknown>; // validado por oneOf discriminado por eventType
-}
-```
-`receivedAt` é acrescentado pelo Control Center (não vem do runtime). Nada de `LEANDRO` serializado como agente técnico. HUMAN_GATE preserva proveniência de autoridade sem expor dados de autenticação.
+**Decisão RAFAEL:**
+- Usar especificação SQL sugerida por SOFIA (linhas 80-104 de `SOFIA-E3-ARCHITECTURE-REVIEW.md`)
+- `payload` como `JSONB` (permite query parcial e índices)
+- Índices: `occurred_at DESC`, `event_type`, `mission_id` (filter WHERE)
+- `signature_valid` como coluna booleana para auditoria
+- `schema_version` para evolução futura
 
-### 1. Payload schemas — eventos críticos (BLOCKER-01)
+**Decisão pendente:** TTL ou particionamento mensal — confirmar com LÉO antes de production
 
-Fonte de verdade: TypeScript interface; JSON Schema derivado para validação no ingest.
+---
 
-```ts
-type MissionState = "CREATED"|"ACTIVE"|"BLOCKED"|"COMPLETED"|"ABANDONED";
-type GateType = "TECHNICAL"|"ARCHITECTURE"|"SECURITY"|"CONTINUITY"|"FINAL";
-type GateAuthority = "HUMAN"|"MESTRE"|"LEO"|"AUTOMATED";
-type VerificationResult = "PASS"|"FAIL"|"PARTIAL";
-type VerificationState = "UNVERIFIED"|"VERIFIED"|"REJECTED"|"SOURCE_UNAVAILABLE";
+### Decisão técnica recomendada #3: Projeções MCF
 
-interface MISSION_CREATED {
-  missionCode: string;          // ex "MCF-CONTROL-CENTER-001" (unique)
-  name: string;
-  objective: string;
-  description?: string;
-  repository?: string;          // "owner/repo" full_name
-  leadAgent?: string;           // ex "MESTRE"
-}
-interface MISSION_STATE_CHANGED {
-  fromState: MissionState;
-  toState: MissionState;
-  reason: string;
-}
-interface PHASE_STARTED {
-  phaseCode: string;
-  phaseName: string;
-  startedAt: string;            // ISO8601
-  inputArtifacts?: string[];
-}
-interface PHASE_COMPLETED {
-  phaseCode: string;
-  phaseName: string;
-  completedAt: string;
-  durationMs: number;
-  outputArtifacts: string[];    // refs a receipts/evidence
-  resultsNote?: string;
-}
-interface HANDOFF_CREATED {
-  fromAgent: string;
-  toAgent: string;
-  context: string;
-  artifacts: string[];          // refs
-  command?: string;             // instrução operacional compacta
-}
-interface GATE_OPENED {
-  gateType: GateType;
-  openedBy: string;
-  openedAt: string;
-  criteria: string[];
-  request: string;
-}
-interface GATE_RESOLVED {
-  gateType: GateType;
-  resolvedBy: string;
-  decision: "OPEN"|"CLOSE"|"DEFER";
-  resolvedAt: string;
-  evidenceRefs: string[];
-  authority: GateAuthority;
-  reason: string;
-}
-interface EVIDENCE_ACCEPTED {
-  evidenceType: string;         // "test-result"|"artifact-sha"|"receipt"|...
-  provider: string;             // agente produtor
-  verificationResult: VerificationResult;
-  verificationState: VerificationState;
-  refUri?: string;
-  hashSha256?: string;
-}
-interface EVIDENCE_REJECTED extends Omit<EVIDENCE_ACCEPTED,"verificationResult"> {
-  reason: string;               // obrigatório no REJECTED
-}
+**Pergunta:** Como estruturar as tabelas de projeção?
+
+**Decisão RAFAEL:**
+- SOFIA lista projeções (linhas 52-61 de arquitetura), mas não especifica schema
+- **Bloqueio:** Não posso implementar projeções MCF sem alinhamento prévio
+- **Recomendação:** Workshop com SOFIA + LÉO + Rafael antes de E4 para definir campos, chaves e relações
+- **Risco:** Se estrutura divergir do mental model do MCF Runtime, eventos não projetarão corretamente (Risco 4.4)
+
+---
+
+### Decisão técnica recomendada #4: Reconciliação GitHub
+
+**Pergunta:** Como especificar o reconciliador periódico?
+
+**Decisão RAFAEL:**
+- SOFIA recomenda (NÃO-BLOCKER-3): 1x/dia às 3 AM UTC, scope PRs/issues abertos + último commit de cada branch ativa
+- **Recomendação:** Implementar como job agendado (cron) no Vercel ou separado no futuro
+- **Ação:** Criar tabela `reconciliation_alerts` para log de divergências
+
+---
+
+### Decisão técnica recomendada #5: Realtime fallback
+
+**Pergunta:** Como especificar degradação de Realtime?
+
+**Decisão RAFAEL:**
+- SOFIA recomenda (NÃO-BLOCKER-4): UI detecta perda de Realtime (heartbeat >30s), ativa polling 10s, banner "Modo Degradado", reconexão exponencial (5s, 10s, 20s, max 60s)
+- **Implementação possível:** Adaptador isolado (`lib/realtime-adapter.ts`) com hooks para polling
+- **Ação:** Implementar como feature flag ou progressiva, não bloquear primeiro deploy read-only
+
+---
+
+## 4. SCHEMA/ÍNDICES/TRANSAÇÕES — CORREÇÕES CONCRETAS
+
+### 4.1 Correção de BLOCKER-1 (autenticação MCF)
+
+**Definição obrigatória (SOFIA deve adicionar a `MCF-CONTROL-EVENT-v1.md`):**
+
+```markdown
+## Autenticação e Assinatura
+
+1. **Algoritmo:** HMAC-SHA256 sobre corpo canônico
+   - Cânico: `eventId|occurredAt|eventType|missionId|repository|commitSha|missionVersion`
+   - Secret: `MCF_RUNTIME_SIGNING_SECRET` (env var, 64+ chars)
+   - Assinatura: `X-MCF-Signature: sha256=<hex>`
+   - Versão: `X-MCF-Signature-Version: v1`
+
+2. **Tratamento de replay:**
+   - Janela de 5 minutos baseada em `occurredAt` vs `receivedAt`
+   - Se `receivedAt - occurredAt > 5min`, rejeitar como replay
+
+3. **Eventos sensíveis:**
+   - Sempre assinados: `MISSION_STARTED`, `PHASE_STARTED`, `HANDOFF_CREATED`, `GATE_OPENED`, `GATE_RESOLVED`, `EVIDENCE_REJECTED`
+   - Opcionais: `MISSION_COMPLETED`, `RUNTIME_HEALTH_CHANGED`
+
+4. **Rotação de chaves:**
+   - Período de sobreposição de 7 dias
+   - Validar contra duas chaves antigas e atual
 ```
 
-Regra de validação: `oneOf` por `eventType`, `additionalProperties:false`, campos `required` por tipo. `PHASE_STARTED`/`COMPLETED`, `GATE_OPENED`/`RESOLVED`, `EVIDENCE_ACCEPTED`/`REJECTED` são pares semanticamente unidos — validação deve garantir que um tipo do par completo exista (fases abrem e fecham; gates abrem e resolvem). Eventos RUNTIME_HEALTH_CHANGED e AGENT_ASSIGNED também entram na spec (mesma disciplina) mas não são gate de bloqueio para E4 se ficarem além do mínimo crítico — incluo todos para evitar nova revisão.
+**Implementação RAFAEL (após especificação):**
+- Endpoint `/api/ingest/mcf` valida assinatura antes de persistir
+- Armazena `signature_valid` em `source_events` para auditoria
+- Retorna `401 UNAUTHORIZED` se assinatura inválida ou replay
 
-### 2. Schema / DDL lógico inicial (BLOCKER-02)
+---
 
-**Ledger (append-only):**
+### 4.2 Correção de BLOCKER-2 (schema `source_events`)
+
+**Definição concreta (RAFAEL pode implementar):**
 
 ```sql
+-- Ledger de eventos
 CREATE TABLE source_events (
-  event_id    UUID PRIMARY KEY,          -- UUIDv7, identidade de negócio
-  source      TEXT NOT NULL CHECK (source IN ('mcf-runtime','github')),
-  event_type  TEXT NOT NULL,
-  schema_version TEXT NOT NULL DEFAULT 'mcf_control_event/v1',
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id TEXT NOT NULL UNIQUE,          -- do envelope
+  event_type TEXT NOT NULL,
+  source TEXT NOT NULL,
   occurred_at TIMESTAMPTZ NOT NULL,
   received_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  mission_id  UUID,
-  event_payload JSONB NOT NULL,
-  raw_body    BYTEA,                      -- bytes canônicos p/ re-verif. assinatura e auditoria
-  signature   TEXT,
-  signature_key_id TEXT
+  mission_id UUID,
+  phase_id UUID,
+  agent_id TEXT,
+  skill_id TEXT,
+  repository TEXT,
+  commit_sha TEXT,
+  mission_version INTEGER,
+  evidence_ref TEXT,
+  payload JSONB NOT NULL,
+  signature_valid BOOLEAN NOT NULL DEFAULT FALSE,
+  schema_version TEXT NOT NULL DEFAULT 'mcf_control_event/v1'
 );
-CREATE INDEX idx_src_events_source_occ ON source_events(source, occurred_at);
-CREATE INDEX idx_src_events_mission   ON source_events(mission_id);
--- Garantia de imutabilidade no banco:
-CREATE OR REPLACE FUNCTION forbid_source_events_mutation() RETURNS trigger AS $$
-BEGIN RAISE EXCEPTION 'source_events is append-only'; END $$ LANGUAGE plpgsql;
-CREATE TRIGGER trg_source_events_no_update BEFORE UPDATE OR DELETE ON source_events
-  FOR EACH ROW EXECUTE FUNCTION forbid_source_events_mutation();
-```
 
-```sql
+-- Índices de leitura
+CREATE INDEX idx_source_events_occurred ON source_events(occurred_at DESC);
+CREATE INDEX idx_source_events_type ON source_events(event_type);
+CREATE INDEX idx_source_events_mission ON source_events(mission_id) WHERE mission_id IS NOT NULL;
+
+-- Tabela de receipts de ingestão
 CREATE TABLE ingest_receipts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id UUID NOT NULL UNIQUE REFERENCES source_events(event_id),
-  status   TEXT NOT NULL CHECK (status IN ('ACCEPTED','REJECTED')),
-  http_status INT NOT NULL,
-  signature_valid BOOLEAN,
-  timestamp_within_window BOOLEAN,
-  rejection_reason TEXT,
+  event_id TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL CHECK (status IN ('ACCEPTED', 'REJECTED', 'DUPLICATE')),
+  reason TEXT,
   received_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
--- Auditoria de segurança p/ entradas rejeitadas (envenenam o ledger se persistidas nele):
-CREATE TABLE ingest_rejections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  received_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  stage TEXT NOT NULL,                 -- 'signature'|'timestamp'|'schema'|'duplicate-check-failure'
-  reason TEXT NOT NULL,
-  event_type TEXT,
-  occurred_at TIMESTAMPTZ,
-  received_ip TEXT,
-  payload_hash TEXT
-);
+
+CREATE INDEX idx_ingest_receipts_event ON ingest_receipts(event_id);
 ```
 
-**Projeções (todas com colunas-base de rastreabilidade LIVE):** `source TEXT`, `source_event_id UUID REFERENCES source_events(event_id)`, `occurred_at TIMESTAMPTZ`, `received_at TIMESTAMPTZ`, `verification_state TEXT DEFAULT 'VERIFIED'` (valor de `VerificationState`).
-
-```sql
-CREATE TABLE missions (
-  id UUID PRIMARY KEY,
-  mission_code TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  state TEXT NOT NULL,
-  repository TEXT, objective TEXT, lead_agent TEXT, commit_sha TEXT,
-  created_at TIMESTAMPTZ NOT NULL, updated_at TIMESTAMPTZ NOT NULL,
-  source, source_event_id, occurred_at, received_at, verification_state
-);
-CREATE TABLE mission_phases (
-  id UUID PRIMARY KEY,
-  mission_id UUID NOT NULL REFERENCES missions(id),
-  phase_code TEXT NOT NULL, phase_name TEXT NOT NULL,
-  state TEXT NOT NULL DEFAULT 'NOT_STARTED',
-  started_at TIMESTAMPTZ, completed_at TIMESTAMPTZ, duration_ms BIGINT,
-  output_artifacts JSONB,
-  source_event_id, ... ,
-  UNIQUE (mission_id, phase_code)
-);
-CREATE TABLE agents (
-  id TEXT PRIMARY KEY,                 -- key de preset: 'MESTRE','LEANDRO','RAFAEL',...
-  name TEXT NOT NULL, role TEXT, status TEXT,
-  last_seen_at TIMESTAMPTZ, source_event_id, ...
-);
-CREATE TABLE skills (
-  id TEXT PRIMARY KEY,                 -- 'MCF-START-MISSION',...
-  name TEXT NOT NULL, description TEXT, version TEXT, source_event_id, ...
-);
-CREATE TABLE mission_assignments (
-  id UUID PRIMARY KEY,
-  mission_id UUID NOT NULL REFERENCES missions(id),
-  agent_id TEXT NOT NULL REFERENCES agents(id),
-  skill_id TEXT REFERENCES skills(id),
-  role TEXT, granted_at TIMESTAMPTZ, revoked_at TIMESTAMPTZ,
-  active BOOLEAN NOT NULL DEFAULT true,
-  source_event_id, ...,
-  UNIQUE (mission_id, agent_id, skill_id)
-);
-CREATE TABLE handoffs (
-  id UUID PRIMARY KEY,
-  mission_id UUID NOT NULL REFERENCES missions(id),
-  phase_id UUID REFERENCES mission_phases(id),
-  from_agent TEXT NOT NULL REFERENCES agents(id),
-  to_agent TEXT NOT NULL REFERENCES agents(id),
-  context TEXT, artifacts JSONB, command TEXT,
-  created_at TIMESTAMPTZ NOT NULL, source_event_id, ...
-);
-CREATE TABLE gates (
-  id UUID PRIMARY KEY,
-  mission_id UUID NOT NULL REFERENCES missions(id),
-  phase_id UUID REFERENCES mission_phases(id),
-  gate_type TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'OPEN',
-  opened_by TEXT, opened_at TIMESTAMPTZ,
-  resolved_by TEXT, decision TEXT, resolved_at TIMESTAMPTZ,
-  authority TEXT, reason TEXT,
-  criteria JSONB, evidence_refs JSONB, source_event_id, ...
-);
-CREATE TABLE evidence_receipts (
-  id UUID PRIMARY KEY,
-  mission_id UUID REFERENCES missions(id),
-  provider TEXT NOT NULL,
-  evidence_type TEXT NOT NULL,
-  verification_result TEXT NOT NULL,
-  verification_state TEXT NOT NULL,
-  reason TEXT, ref_uri TEXT, hash_sha256 TEXT,
-  accepted_at TIMESTAMPTZ, source_event_id, ...
-);
-CREATE TABLE runtime_snapshots (
-  id UUID PRIMARY KEY,
-  agent_id TEXT REFERENCES agents(id),
-  status TEXT NOT NULL, schema_version TEXT, payload JSONB,
-  captured_at TIMESTAMPTZ NOT NULL, source_event_id, ...
-);
-```
-
-**Projeções GitHub** (contêm o discriminador que corrige GITPULSE-01 no storage — não no frontend):
-
-```sql
-CREATE TABLE github_repositories (
-  id BIGINT PRIMARY KEY, full_name TEXT UNIQUE NOT NULL,
-  owner TEXT NOT NULL, description TEXT, default_branch TEXT,
-  html_url TEXT, updated_at TIMESTAMPTZ, source_event_id, ...
-);
-CREATE TABLE github_pull_requests (
-  id BIGINT PRIMARY KEY,
-  repository_id BIGINT NOT NULL REFERENCES github_repositories(id),
-  number INT NOT NULL, title TEXT, state TEXT,
-  head_sha TEXT, base_sha TEXT,
-  created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ,
-  source_event_id, ..., UNIQUE (repository_id, number)
-);
-CREATE TABLE github_issues (
-  id BIGINT PRIMARY KEY,
-  repository_id BIGINT NOT NULL REFERENCES github_repositories(id),
-  number INT NOT NULL, title TEXT, state TEXT,
-  is_pr BOOLEAN NOT NULL DEFAULT false,   -- discrimina issue real de PR (corrige GITPULSE-01)
-  html_url TEXT, created_at TIMESTAMPTZ, closed_at TIMESTAMPTZ,
-  source_event_id, ..., UNIQUE (repository_id, number)
-);
-CREATE TABLE github_releases (
-  id BIGINT PRIMARY KEY, repository_id BIGINT REFERENCES github_repositories(id),
-  tag_name TEXT NOT NULL UNIQUE, name TEXT, published_at TIMESTAMPTZ,
-  source_event_id, ...
-);
-CREATE TABLE github_activity (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  repository_id BIGINT REFERENCES github_repositories(id),
-  event_type TEXT NOT NULL, actor TEXT, payload JSONB,
-  occurred_at TIMESTAMPTZ NOT NULL, source_event_id, ...,
-  UNIQUE (source_event_id)
-);
-```
-
-**ER (relações críticas):** `missions 1—N mission_phases` · `missions N—N agents via mission_assignments` (com `agents`,`skills`) · `mission_phases 0—1 handoffs` · `mission_phases 0—N gates` · `missions 1—N evidence_receipts`. Todas as projeções apontam `source_event_id → source_events(event_id)` (derivação/reconstrução a partir do ledger). Nada de UPDATE/DELETE em `source_events`.
-
-### 3. Assinatura e replay (CORREÇÃO-03, refinada)
-
-- Mecanismo: **HMAC-SHA256** sobre string `timestamp + "." + raw_body`.
-- Header: `X-MCF-Signature: <timestamp>.<keyId>.<hex>`.
-- Validação no `/api/ingest/mcf` antes de persistir, nesta ordem: (1) header presente e bem-formado; (2) HMAC valida (timing-safe); (3) `|now - timestamp| ≤ 300s`; (4) `eventId` novo (idempotência). Falha em qualquer ⇒ `ingest_rejections` + 4xx; nada no ledger.
-- Rotação: secret versionado por `keyId` em env server-side; múltiplos `keyId` aceitos durante período de rotação (grace). Secrets por fonte (MCF ≠ GitHub).
-
-### 4. Idempotência (CORREÇÃO-04, refinada)
-
-- `eventId` = **UUIDv7** gerado no runtime no momento do evento.
-- Detecção: `source_events.event_id` PRIMARY KEY + `INSERT ... ON CONFLICT (event_id) DO NOTHING RETURNING`.
-- Resposta: novo ⇒ `201 Created` (novo receipt) · duplicata ⇒ `200 OK` (receipt existente, mesmo `id`). Repetição enésima retorna o mesmo receipt.
-- Network retry do runtime não corrompe nem rejeita; é idempotente por construção.
-
-### 5. Projeções e reconstrução (fecho da condição vinculante #2)
-
-- Projeções são **derivadas**: materialização a partir de `source_events` aplicados em ordem de `occurred_at`/sequência. Inconsistência ⇒ reconstrução da projeção a partir do ledger (procedimento documentado em E4, não script hoje).
-- **L-1 (lacuna nova): ordenação/eventos fora de ordem.** Garantir que o ingest não aplica estado passado por cima de estado mais recente — projeção deve guardar a última sequência/`occurred_at` aplicada por agregação e **ignorar eventos fora de ordem** (logando os recebidos tardios para auditoria), ou aplicar por version-guard. A proposta v1 não prevê isso; **só funciona em runtime de fluxo estritamente sequencial**, o que não é garantido.
-- **L-2 (lacuna nova): concorrência/`missionVersion`.** O envelope original carrega `missionVersion`. Definir política: UPDATE otimista com `version` — projeção só avança se `event.version == current.version + 1` (ou `≥` com merge), senão rejeita evento com 409 auditado. Evita perda de atualização quando dois eventos concorrentes da mesma missão chegam próximos. Sem isso, "último que chega vence" corrompe ordem.
-
-### 6. Regra LIVE (fecho da condição vinculante #3)
-
-Todo campo marcado LIVE se resolve por `(source, source_event_id, occurred_at, received_at, verification_state)`. Se `verification_state = 'SOURCE_UNAVAILABLE'` ou a origem não responder, UI exibe `STALE`/`DEGRADED`/`UNKNOWN`, **nunca simula LIVE**. `verification_state` semântica: `VERIFIED` (evento aceito e projeção consistente) · `UNVERIFIED` (aceito, verificação pendente) · `REJECTED` (contra-evidência) · `SOURCE_UNAVAILABLE` (origem indisponível).
+**Decisão de retenção/particionamento:**
+- **Risco:** Sem TTL ou particionamento, tabela cresce indefinidamente
+- **RAFAEL:** Propor particionamento mensal por `occurred_at` para scale futuro
+- **Ação:** Confirmar com LÉO antes de production
 
 ---
 
-## FRONTEIRA E3 → E4
+### 4.3 Transações de projeção
 
-O objetivo desta E3 é **produzir contratos**, não código. Separo com rigor para não transformar planejamento em implementação prematura.
+**Decisão RAFAEL:**
+- Cada evento gera:
+  1. Linha imutável em `source_events`
+  2. Linha em `ingest_receipts`
+  3. Atualização transacional das projeções correspondentes
 
-### DEVE EXISTIR ANTES da E4 (antes de qualquer criação de Vercel/Supabase) — contratos, fechados e commitados
-
-1. `MCF-CONTROL-EVENT-v1` atualizado **ou** novo `MCF-EVENT-PAYLOADS-v1` com as interfaces da seção 1 (BLOCKER-01).
-2. **DDL v1** (`db/migrations/0001_initial_schema.sql`) da seção 2 + **diagrama ER** text/mermaid (BLOCKER-02).
-3. **Spec de assinatura/replay** (seção 3) versionada (CORREÇÃO-03).
-4. **Spec de idempotência** (seção 4) versionada (CORREÇÃO-04).
-5. **Spec de projeção/ordenação/concorrência** (seção 5, lacunas L-1/L-2) versionada.
-6. `.env.example` com todas as variáveis, sem valores reais.
-7. **Gate LÉO** sobre estes contratos + handoff assinado.
-
-Estes são **artefatos de contrato** (docs + SQL versionado), não execução de infra. Criar Vercel/Supabase, aplicar migration, rodar o código é **E4**.
-
-### PODE SER IMPLEMENTADO DENTRO da E4 (não agora)
-
-- Criação dos projetos Vercel + Supabase e aplicação da migration.
-- Implementação do `/api/ingest/mcf` (validação schema + assinatura + idempotência + persistência + projecção).
-- UI shell renderizando projeções com rastreabilidade LIVE.
-- Integração GitHub server-side (token autenticado), webhook, correção de GITPULSE-01/02/03/04.
-- Realtime (fase própria, com polling fallback desde o primeiro dia).
-- Auth/RLS e escrita/commandos permanecem **fora de E4** (gate de fase futura, auditoria de segurança antes de habilitar escrita).
+**Implementação:**
+- Usar `BEGIN; INSERT INTO source_events ...; INSERT INTO ingest_receipts ...; UPDATE projections ...; COMMIT;`
+- Se qualquer passo falhar, rollback completo
+- Usar `ON CONFLICT` para idempotência de `event_id`
 
 ---
 
-## RISCOS E TESTES
+## 5. API/IDEMPOTÊNCIA/ERROS — CONTRATO MÍNIMO
 
-### Gatilhos de risco herdados + refinados
+### 5.1 Endpoint `/api/ingest/mcf`
 
-| Risco | Sev. | Mitigação de engenharia |
-|---|---|---|
-| Eventos fora de ordem corrompem projeção (L-1) | **ALTA** | version/sequência guard; eventos tardios logados, não aplicados sobre estado mais novo |
-| Perda de atualização por concorrência (L-2) | MÉDIA | `missionVersion` + UPDATE otimista; rejeição 409 auditada |
-| Header/rotação de secret divergem entre runtime e CC | ALTA | contract versionado do formato `ts.keyId.hex` + testes unitários; segredos por fonte rotáveis com `keyId` |
-| Suprema supressão de eventos (risco da recomendação UUID v5) | MÉDIA | UUIDv7 + `ON CONFLICT DO NOTHING`; teste de duplicata |
-| Replay forjado | ALTA | HMAC + janela ±300s + idempotência; ordem de validação fixa |
-| Realtime/multi-aba no tier gratuito | BAIXA | polling fallback primário-adjacente; monitorar uso |
-| GitHub rate limit (GITPULSE-04) | MÉDIA | token/PAT server-side (5k/h), nunca frontend |
-| Migração VPS (Realtime Elixir, failover, SSL, CI/CD) | BAIXA | não-bloqueador; documentar dependências Supabase-specific; adaptador de realtime isolado (interface) |
-| Segurança antes de comandos | ALTA | auditoria externa (Emily) + handoff de segurança (Ricardo) antes de qualquer escrita |
+**Status:** DRAFT — bloqueado por BLOCKER-1
 
-### Matriz de testes exigida
+**Resposta esperada (após especificação):**
 
-1. Assinatura válida ⇒ `201` + recebimento em `source_events`/`ingest_receipts`.
-2. Assinatura inválida/ausente ⇒ 401, item em `ingest_rejections`, 0 linhas no ledger.
-3. Timestamp fora da janela ⇒ 4xx, rejeitado (replay), não persistido.
-4. Mesmo `eventId` enviado 2× ⇒ 1 linha no ledger, mesmo receipt, `200` na 2ª.
-5. Evento malformado (schema) ⇒ 400, rejeição auditada.
-6. Evento fora de ordem/versão antiga ⇒ não sobreescreve estado atual; logado.
-7. UPDATE/DELETE em `source_events` ⇒ trigger rejeita (verificação de imutabilidade no banco).
-8. UI: projeção renderiza com `source`, `event_id`, `occurred_at`, `received_at`, `verification_state` auditáveis; origem indisponível ⇒ `STALE`/`UNKNOWN` (não LIVE).
-9. Realtime ou polling propaga mudança sem refresh manual.
-10. GITPULSE-01/02: issue vs PR discriminado (is_pr) e card Commits não mostra watchers.
+| Código | Descrição | Body |
+|--------|-----------|------|
+| `200 OK` | Evento aceito e persistido | `{"receiptId": "uuid", "eventId": "uuid"}` |
+| `202 Accepted` | Evento já existe (idempotência) | `{"receiptId": "uuid", "eventId": "uuid", "duplicate": true}` |
+| `400 Bad Request` | Schema inválido ou campos obrigatórios | `{"error": "Invalid schema", "details": "..."}` |
+| `401 Unauthorized` | Assinatura inválida ou replay | `{"error": "Invalid signature"}` |
+| `429 Too Many Requests` | Rate limit excedido | `{"error": "Rate limit exceeded", "retryAfter": 60}` |
+
+**Idempotência:**
+- Rejeitar eventos com `event_id` duplicado (retornar 202)
+- Registrar em `ingest_receipts` com `status = 'DUPLICATE'`
+- Não persistir novamente
+
+**Rate limit:**
+- Definir limite: 100 eventos/minuto por IP ou por `repository`
+- Usar bucket de token ou rate limiter Redis
+- Retornar `429` com `Retry-After`
 
 ---
 
-## HANDOFF PARA RICARDO
+### 5.2 Endpoint `/api/webhooks/github`
 
-**De:** RAFAEL (Engenharia de Software) · **Para:** RICARDO (Segurança) · **Missão:** MCF-CONTROL-CENTER-001 · **Transição:** E3 → E4
+**Status:** IMPLÍCITO — não especificado em arquitetura
 
-**Escopo do review requerido: os controles de segurança a seguir. Nada disso é autorização de escrita/ação externa — é checklist de revisão antes de integração runtime→control em ambiente não-local e, obrigatoriamente, antes de habilitar qualquer endpoint de comando.**
-
-1. **Esquema criptográfico de ingest:** validar HMAC-SHA256 sobre `ts + "." + raw_body`, formato `X-MCF-Signature: ts.keyId.hex`, comparação timing-safe, e separação de segredos por fonte (MCF runtime ≠ GitHub webhook) — confirmação de que a validação ocorre antes de qualquer persistência e que `raw_body` é preservado para re-verificação forense.
-2. **Key management e rotação:** modelo de `keyId` versionado em env server-side, rotação com grace sem downtime, ausência de qualquer secret commitado (checklist de scan), `.env.example` sem valores.
-3. **Replay protection:** janela ±300s + idempotência `eventId` — validar que os três controles são independentes e que falha em qualquer um fecha o ingest.
-4. **Modelo de ameaças do endpoint público:** `/api/ingest/mcf` exposto publicamente; validar rate limiting, limites de tamanho de body, e que rejeições geram `ingest_rejections` (telemetria de abuso) sem liberar detalhes internos de stack nas respostas.
-5. **Imutabilidade e integridade do ledger:** confirmação do trigger anti-UPDATE/DELETE em `source_events` e hash/`raw_body` para detecção de adulteração.
-6. **Token/credencial GitHub:** uso de token autenticado exclusivamente server-side; nenhuma credencial exposta ao browser; escopo mínimo do token.
-7. **Postgres hardening / RLS:** princípio de least-privilege nas credenciais do app; fundações de RLS definidas desde já (mesmo em fase read-only pública) para que dados operacionais do MCF nunca fiquem expostos sem sessão.
-8. **Realtime seguro:** canais Realtime não devem vazar dados operacionais MCF em deployment público; apenas dados GitHub públicos antes de auth; aplicação de RLS nos channels.
-9. **Preparação para escrita futura:** recomendação de que todo endpoint de comando atravesse o boundary governado do MCF com receipt verificável, e que a **auditoria independente de segurança seja condição bloqueante** antes de habilitá-los.
+**Decisão RAFAEL:**
+- Eventos a aceitar: `pull_request`, `push`, `issues`, `release`
+- Validar assinatura `X-Hub-Signature-256`
+- Mapear eventos GitHub → `source_events.event_type`
+- **Ação:** Criar tabela de mapeamento `github_event_type → control_center_event_type`
 
 ---
 
-**Status E3:** VIÁVEL · CONDICIONAL — aguardando concordância com os refinamentos (UUIDv7, assinatura de raw bytes com rotação `keyId`, ledger imutável com trigger, camada de rejeição separada, e lacunas L-1 relevando ordenação + L-2 concorrência/`missionVersion`).
-**Retorno a:** MESTRE (para atualizar os contratos sob its autoridade) e LÉO (gate de continuidade sobre esses contratos).
-**Próximo:** E4 — após contratos fechados e revisão RICARDO das seções acima.
+### 5.3 Contrato de erro e logging
 
-**RAFAEL · Engenharia de Software · MCF** — saída de revisão somente leitura; nenhum arquivo criado/alterado/excluído; nenhuma ação externa executada.
+**Decisão RAFAEL:**
+- Todos os erros retornam JSON com `error` e `timestamp`
+- Erros não esperados (500) logam stack trace em server
+- Eventos rejeitados (400/401) persistem em `ingest_receipts` com `reason`
+
+---
+
+## 6. RISCOS VERCEL + SUPABASE + MIGRAÇÃO VPS
+
+### 6.1 Dependência de Supabase Realtime
+
+**Risco:** Se Supabase Realtime tiver mudança incompatível de API ou limite de conexões insuficiente, toda experiência "live" quebra.
+
+**Mitigação RAFAEL:**
+- Adaptador isolado (`lib/realtime-adapter.ts`) separado da lógica de domínio
+- Fallback para polling já previsto (NÃO-BLOCKER-4)
+- Monitorar métricas de conexões em produção
+
+**Classificação:** **ACEITÁVEL** — mitigação presente em arquitetura
+
+---
+
+### 6.2 Rate limit de GitHub webhooks
+
+**Risco:** GitHub não garante entrega imediata nem ordenada. Em rajada de eventos, pode haver delay ou perda.
+
+**Mitigação RAFAEL:**
+- Job de reconciliação periódico detecta divergências (NÃO-BLOCKER-3)
+- **Risco:** Reconciliador não garante entrega; pode haver perda de eventos
+
+**Classificação:** **ACEITÁVEL** — mitigação presente em arquitetura, mas risco de perda em rajadas
+
+---
+
+### 6.3 Explosão de `source_events`
+
+**Risco:** Sem TTL ou particionamento, tabela cresce indefinidamente. 1 milhão de eventos = ~1 GB JSONB, afetando índices e backup.
+
+**Mitigação RAFAEL:**
+- **BLOCKER-2 obriga especificação de índices** (já corrigido)
+- Decisão de TTL/particionamento pode ser delegada a Rafael com monitoramento nos primeiros 3 meses
+- Propor particionamento mensal por `occurred_at` para scale futuro
+
+**Classificação:** **ACEITÁVEL** — mitigação presente em especificação SQL, decisão de retenção pendente
+
+---
+
+### 6.4 Acoplamento entre projeções MCF e domínio do runtime
+
+**Risco:** Se estrutura de `missions`, `gates`, `handoffs` no Control Center divergir do modelo mental do MCF Runtime, eventos não vão projetar corretamente e UI exibirá estado inconsistente.
+
+**Mitigação RAFAEL:**
+- Contrato explícito `MCF-CONTROL-EVENT-v1` como boundary
+- **Recomendação:** Workshop de alinhamento SOFIA + LÉO + Rafael antes de E4
+
+**Classificação:** **ACEITÁVEL** — mitigação proposta, não implementada ainda
+
+---
+
+## 7. ORDEM DE IMPLEMENTAÇÃO RECOMENDADA
+
+### Fase 0: Resolução de BLOCKERS (SOFIA/MESTRE)
+
+1. **BLOCKER-1:** SOFIA/MESTRE especifica autenticação/assinatura em `MCF-CONTROL-EVENT-v1.md`
+2. **BLOCKER-2:** SOFIA adiciona especificação SQL de `source_events` em `E3-CONTROL-CENTER-ARCHITECTURE.md`
+
+**Output esperado:** Contrato de assinatura e schema de ledger definidos
+
+---
+
+### Fase 1: Estrutura base e ledger (RAFAEL)
+
+1. Criar estrutura Next.js/TypeScript no Vercel
+2. Conectar projeto Supabase
+3. Criar migrations SQL para `source_events` e `ingest_receipts` (conforme especificação BLOCKER-2)
+4. Implementar tabela de mapeamento GitHub → `source_events`
+5. Criar estrutura inicial de projeções GitHub (sem lógica ainda)
+
+**Output esperado:** Banco de dados rodando, migrations versionadas
+
+---
+
+### Fase 2: GitHub server-side (RAFAEL)
+
+1. Implementar `/api/webhooks/github` com validação de assinatura
+2. Mapear eventos GitHub → `source_events.event_type`
+3. Persistir eventos em `source_events`
+4. Atualizar projeções `github_pull_requests`, `github_issues` transacionalmente
+5. Implementar job de reconciliação (1x/dia, log divergências)
+6. Criar UI básica de GitPulse lendo projeções
+7. Implementar regra LIVE com rastreamento de fonte em tooltip/metadata
+
+**Output esperado:** Webhook recebendo eventos, UI exibindo dados GitHub com LIVE
+
+---
+
+### Fase 3: MCF Runtime outbound (RAFAEL — bloqueado até BLOCKER-1 resolvido)
+
+1. Implementar `/api/ingest/mcf` com validação de assinatura (conforme BLOCKER-1)
+2. Persistir eventos em `source_events`
+3. Criar projeções MCF (`missions`, `mission_phases`, `agents`, `skills`, `mission_assignments`, `handoffs`, `gates`, `evidence_receipts`, `runtime_snapshots`)
+4. Atualizar projeções transacionalmente
+5. Criar UI Mission Control lendo projeções MCF
+6. Implementar regra LIVE para dados MCF
+
+**Output esperado:** Runtime MCF enviando eventos, UI Mission Control exibindo estado
+
+---
+
+### Fase 4: Realtime + fallback (RAFAEL)
+
+1. Conectar Supabase Realtime no cliente
+2. Criar adaptador isolado (`lib/realtime-adapter.ts`)
+3. Implementar detecção de perda de Realtime (heartbeat >30s)
+4. Ativar polling 10s em fallback
+5. Exibir banner "Modo Degradado" quando em fallback
+6. Implementar reconexão exponencial (5s, 10s, 20s, max 60s)
+
+**Output esperado:** UI atualiza em tempo real, fallback funciona em caso de falha
+
+---
+
+### Fase 5: Portabilidade e documentação (RAFAEL)
+
+1. Documentar deploy alternativo para VPS + PostgreSQL
+2. Verificar que nenhuma função proprietária Vercel está em lógica de domínio
+3. Verificar que URLs e secrets estão em `.env` com `.env.example`
+4. Verificar que adaptador de Realtime está isolado
+5. Documentar migrations SQL versionadas
+
+**Output esperado:** README com instruções de deploy alternativo
+
+---
+
+## 8. HANDOFF PARA RICARDO
+
+### Estado entregue por RAFAEL
+
+**Artefatos analisados:**
+- ✅ `source/E3-CONTROL-CENTER-ARCHITECTURE.md` — arquitetura estruturalmente sólida
+- ✅ `source/MCF-CONTROL-EVENT-v1.md` — contrato de evento com bloqueio de autenticação
+- ✅ `source/SOFIA-E3-ARCHITECTURE-REVIEW.md` — revisão com 2 BLOCKERS e 5 NÃO-BLOCKER
+- ✅ `agents/RAFAEL.md` — contrato normativo de Engenharia de Software
+
+**Veredito:**
+- Arquitetura **APROVADA** com correções obrigatórias
+- **2 BLOCKERS** confirmados: autenticação MCF e schema `source_events`
+- **5 NÃO-BLOCKER** identificados: projeções MCF, GitPulse baseline, reconciliação, Realtime fallback, boundary de comandos
+
+**Decisões de engenharia necessárias antes de E4:**
+1. Especificação formal de autenticação/assinatura MCF (BLOCKER-1)
+2. Estrutura SQL de `source_events` (BLOCKER-2 — já sugerida por SOFIA)
+3. Schema de projeções MCF (NÃO-BLOCKER-1)
+4. Estratégia de preservação GitPulse (NÃO-BLOCKER-2)
+5. Contrato de reconciliação GitHub (NÃO-BLOCKER-3)
+6. Regra de degradação Realtime (NÃO-BLOCKER-4)
+
+**Riscos identificados:**
+- Dependência de Supabase Realtime (mitigada com adaptador + fallback)
+- Rate limit GitHub webhooks (mitigada com reconciliador)
+- Explosão de `source_events` (mitigada com especificação SQL + decisão de retenção)
+- Acoplamento projeções MCF (mitigada com workshop prévio)
+
+**Ordem de implementação recomendada:**
+1. Resolução de BLOCKERS (SOFIA/MESTRE)
+2. Estrutura base e ledger (RAFAEL)
+3. GitHub server-side (RAFAEL)
+4. MCF Runtime outbound (RAFAEL — bloqueado até BLOCKER-1)
+5. Realtime + fallback (RAFAEL)
+6. Portabilidade e documentação (RAFAEL)
+
+---
+
+### Handoff para Ricardo
+
+**Ricardo, a fase E4 está bloqueada até que SOFIA ou MESTRE resolva os 2 BLOCKERS identificados.**
+
+**Pré-requisitos para E4:**
+1. **BLOCKER-1:** Especificação de autenticação/assinatura MCF em `MCF-CONTROL-EVENT-v1.md`
+2. **BLOCKER-2:** Especificação SQL de `source_events` em `E3-CONTROL-CENTER-ARCHITECTURE.md`
+
+**Seu escopo (após pré-requisitos resolvidos):**
+- Criar estrutura Next.js/TypeScript no Vercel
+- Criar migrations SQL para ledger e projeções
+- Implementar `/api/webhooks/github` e `/api/ingest/mcf`
+- Conectar Supabase Realtime com fallback
+- Criar UI Mission Control e GitPulse
+- Implementar regra LIVE com rastreamento de fonte
+- Documentar portabilidade futura
+
+**O que NÃO fazer:**
+- Não implementar comandos/escrita ainda
+- Não inventar especificações de segurança
+- Não presunir schema de projeções MCF sem alinhamento
+
+**Próxima ação:**
+- Aguardar SOFIA/MESTRE resolver BLOCKERS
+- Implementar E4 conforme ordem recomendada
+- Entregar resultados para auditoria
+
+---
+
+**Status final:** Arquitetura pronta para E4 após correção de BLOCKER-1 e BLOCKER-2. SOFIA permanece disponível para alinhamento de projeções MCF (NÃO-BLOCKER-1) e revisão de contratos de comando futuros.
