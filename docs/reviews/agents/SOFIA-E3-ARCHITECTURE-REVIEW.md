@@ -1,373 +1,339 @@
-# Evidence provenance
+# REVISÃO ARQUITETURAL — MCF CONTROL CENTER E3
 
-- Mission: `MCF-CONTROL-CENTER-001`
-- Stage: `E3`
-- Agent preset: `mcf-sofia`
-- DeepSeek Harness session: `session-55a8da68-d821-4a42-916c-c2729e551ebf`
-- Provider: `nine-router-kiro`
-- Model: `kr/claude-sonnet-4.5`
-- Execution boundary: isolated read-only review workspace `/tmp/mcf-control-center-e3`
-- Reviewed input SHA-256: `E2=49f19c0a3dc01f52a5be1f0697e3dde4573df5b055812b52f481a43d1a9a5a62`, `architecture=892783008a49d68b7e1103afd4f5ced55243247f78f783034d2dc6d817a62b75`, `event-contract=6ffff93d674384a001422a393e2cfa456ddded5d159db41911fe14de4646541c`
-- Tool behavior observed: three `read` calls; no write/edit/delete/external action
-- Final step: `2`
-- Final usage: `{"inputTokens": 25192, "outputTokens": 4507}`
+**Arquiteta:** SOFIA
+**Data:** 2026-09-02T19:57:57Z
+**Artefatos analisados:**
+- `/tmp/mcf-control-center-e3/source/E3-CONTROL-CENTER-ARCHITECTURE.md`
+- `/tmp/mcf-control-center-e3/source/MCF-CONTROL-EVENT-v1.md`
+- `/tmp/mcf-control-center-e3/agents/SOFIA.md`
 
 ---
 
-## REVISÃO ARQUITETURAL — SOFIA
+## 1. VEREDITO — **APROVADA COM CORREÇÕES**
 
-**Missão:** MCF-CONTROL-CENTER-001
-**Etapa:** E3 — Arquitetura do Control Center
-**Data:** 2026-09-02T19:23:51Z
-**Modo:** Somente leitura, análise crítica independente
+A arquitetura proposta é estruturalmente sólida e alinhada com os princípios de event sourcing, separação de fontes de verdade e portabilidade. As decisões centrais são defensáveis. Existem **2 BLOCKER** e **5 NÃO-BLOCKER** que devem ser endereçadas antes ou durante E4.
 
 ---
 
-## VEREDITO
+## 2. DECISÕES ARQUITETURAIS ACEITAS
 
-**E3_ARCHITECTURE_REVIEW = APROVADO COM CORREÇÕES OBRIGATÓRIAS**
+### 2.1 Princípio "Interface nunca é fonte de verdade"
+✅ **ACEITO**. A inversão de dependência está correta: o cockpit projeta estado recebido de GitHub e MCF Runtime, não inventa estado próprio.
 
-A arquitetura proposta é **estruturalmente sólida e suficiente** para avançar à E4 (implementação Vercel + Supabase), **sob condição de que as correções obrigatórias sejam endereçadas antes de integração runtime-to-control**.
+### 2.2 Event ledger + Projections
+✅ **ACEITO**. A separação entre `source_events` (append-only) e projeções materializadas (`missions`, `github_pull_requests`, etc.) é padrão CQRS/Event Sourcing e atende requisitos de auditoria e reconstrução de estado.
 
-A arquitetura **não cria acoplamento indevido** com infraestrutura temporária e preserva portabilidade futura para VPS própria conforme planejado.
+### 2.3 Push model (MCF Runtime → Control Center)
+✅ **ACEITO**. O runtime envia eventos outbound via HTTPS POST assinado, eliminando necessidade de abrir portas de entrada no notebook/VPS. Decisão correta para segurança e simplicidade operacional.
 
----
+### 2.4 Portabilidade (Vercel + Supabase → VPS futuro)
+✅ **ACEITO**. Restrições propostas (PostgreSQL canônico, contratos em TypeScript padrão, env vars, migrations versionados, adaptador de realtime isolado) asseguram migração sem refatoração estrutural. O lockdown contra funções proprietárias da Vercel está explícito.
 
-## DECISÕES ACEITAS
+### 2.5 Regra LIVE
+✅ **ACEITO**. Exigir rastreamento de `source`, `source_event_id`, `occurred_at`, `received_at`, SHA e estado de verificação para qualquer campo marcado LIVE é rigor apropriado. A degradação para `STALE`/`DEGRADED`/`UNKNOWN` quando origem indisponível é honesta e necessária.
 
-### 1. Separação de responsabilidades
-✅ **Interface nunca é fonte de verdade** — princípio central correto e bem declarado.
-✅ **Event ledger + projections** — padrão CQRS simplificado adequado ao caso de uso.
-✅ **MCF Runtime envia eventos outbound** — elimina problema de firewall/NAT do notebook/VPS.
-
-### 2. Stack tecnológica inicial
-✅ **Next.js + TypeScript** — adequado para frontend/backend integrado, facilita server-side.
-✅ **Vercel** — deployment rápido, adequado para prova de conceito e fase inicial.
-✅ **Supabase/Postgres** — PostgreSQL como storage canônico preserva portabilidade.
-✅ **Supabase Realtime** — mecanismo push adequado; polling como fallback declarado.
-
-### 3. Segurança por fases
-✅ **Dados públicos GitHub primeiro** — reduz superfície de risco antes de auth.
-✅ **Secrets server-side exclusivamente** — correto.
-✅ **UI read-only inicial** — decisão prudente, comandos somente após governança.
-
-### 4. Portabilidade futura
-✅ **Domínio/contratos TypeScript padrão** — não dependente de runtime proprietário.
-✅ **PostgreSQL canônico** — migrations versionados, SQL portável.
-✅ **Environment variables** — desacoplamento de URLs/credenciais confirmado.
-✅ **Adaptador realtime separado** — camada de abstração preserva domínio.
-
-### 5. Preservação de baseline
-✅ **GitPulse e Mission Control preservados** — auditoria E2 confirmou estado funcional conhecido.
-✅ **GitPulse LIVE parcial confirmado** — polling de eventos GitHub verificado; métricas com falhas conhecidas (GITPULSE-01, 02, 03).
-✅ **Mission Control snapshot estático** — nenhuma evidência de runtime conectado no artefato original.
+### 2.6 Read-only first, comandos depois
+✅ **ACEITO**. Deferindo escrita/comandos para pós-autenticação e exigindo que ação atravesse boundary governado do MCF com receipt verificável, a arquitetura evita simulação de estado e preserva integridade.
 
 ---
 
-## CORREÇÕES OBRIGATÓRIAS
+## 3. CORREÇÕES OBRIGATÓRIAS
 
-### BLOCKER-01: Contrato de evento MCF incompleto
+### 🚨 BLOCKER-1: Especificação de autenticação/assinatura do envelope MCF ausente
 
-**Arquivo:** `MCF-CONTROL-EVENT-v1.md`
+**Localização:** `MCF-CONTROL-EVENT-v1.md`, linha 54.
 
-**Problema:**
-O contrato define envelope e tipos, mas **não especifica payload schemas** para cada `eventType`. Linha 24 mostra `"payload": {}` sem estrutura.
+**Problema:** O contrato exige "autenticação/assinatura no transporte" para eventos sensíveis, mas não define:
+- algoritmo de assinatura (HMAC-SHA256? Ed25519? JWT?);
+- onde a assinatura viaja (header `X-MCF-Signature`? campo `signature` no payload?);
+- rotação de chaves;
+- tratamento de replay (janela temporal? nonce?);
+- distinção entre eventos públicos e sensíveis.
 
-**Impacto:**
-- Ingest API não pode validar eventos recebidos além do envelope.
-- Projeções não podem ser materializadas sem saber campos disponíveis.
-- Runtime e Control Center podem divergir silenciosamente.
+**Impacto:** Sem isso, `/api/ingest/mcf` não pode ser implementado com segurança verificável. Qualquer ator com acesso à URL pode injetar eventos falsos.
 
 **Correção obrigatória:**
-Antes de E4, Rafael deve especificar schema de `payload` para **no mínimo** estes eventos críticos:
-- `MISSION_CREATED` (nome, descrição, repositório, objetivo)
-- `MISSION_STATE_CHANGED` (estado anterior, novo estado, razão)
-- `PHASE_STARTED` / `PHASE_COMPLETED` (nome fase, entrada/saída, duração)
-- `HANDOFF_CREATED` (agente origem, destino, contexto, artefatos)
-- `GATE_OPENED` / `GATE_RESOLVED` (tipo gate, evidências, decisão, autoridade)
-- `EVIDENCE_ACCEPTED` / `EVIDENCE_REJECTED` (tipo evidência, resultado verificação, razão rejeição)
-
-**Critério de aceite:**
-JSON Schema ou TypeScript interface para cada payload, versionado no contrato.
+Adicionar seção **"Autenticação e Assinatura"** ao contrato MCF-CONTROL-EVENT-v1 definindo:
+1. HMAC-SHA256 sobre corpo canônico (`eventId|occurredAt|eventType|missionId`) com secret compartilhado via env var `MCF_RUNTIME_SIGNING_SECRET`;
+2. Assinatura em header `X-MCF-Signature: sha256=<hex>`;
+3. Janela de replay de 5 minutos baseada em `occurredAt` vs. `receivedAt`;
+4. Lista de `eventType` sensíveis que DEVEM ser assinados vs. públicos opcionais;
+5. Procedimento de rotação de secret (período de sobreposição com validação de dois secrets).
 
 ---
 
-### BLOCKER-02: Schema Postgres ausente
+### 🚨 BLOCKER-2: Schema de `source_events` não especificado
 
-**Arquivo:** `E3-CONTROL-CENTER-ARCHITECTURE.md` linhas 46-69
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 49.
 
-**Problema:**
-Documento lista **nomes de tabelas** mas não define:
-- colunas, tipos, constraints;
-- chaves primárias e índices;
-- relações entre tabelas;
-- campos de rastreabilidade LIVE (source, source_event_id, occurred_at, received_at, sha, verification_state).
+**Problema:** A tabela `source_events` é descrita como ledger imutável, mas não há especificação de colunas, índices, particionamento ou TTL. O contrato MCF-CONTROL-EVENT-v1 define o envelope JSON, mas não como ele persiste.
 
-**Impacto:**
-Rafael não pode implementar migrations sem schema concreto. Sem campos de rastreabilidade, regra LIVE (linhas 70-80) não pode ser verificada.
+**Impacto:** Rafael não pode criar migrations sem decisão sobre:
+- `payload` como `JSONB` ou `TEXT`?
+- índices em `eventType`, `missionId`, `occurredAt`?
+- particionamento por data para escala futura?
+- retenção infinita ou TTL após X meses?
 
 **Correção obrigatória:**
-Antes de E4, Rafael deve produzir:
-1. **DDL inicial** para todas as tabelas listadas (ledger + projections).
-2. **Migration v1** versionada no repositório.
-3. **Diagrama ER** mostrando relações críticas (missions ↔ phases ↔ agents ↔ handoffs ↔ gates).
-
-**Exemplo mínimo esperado para `missions`:**
+Adicionar ao documento E3-CONTROL-CENTER-ARCHITECTURE.md, seção **"Schema detalhado do Ledger"**:
 
 ```sql
-CREATE TABLE missions (
-  id UUID PRIMARY KEY,
-  mission_code TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  state TEXT NOT NULL,
+CREATE TABLE source_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id TEXT NOT NULL UNIQUE, -- do envelope
+  event_type TEXT NOT NULL,
+  source TEXT NOT NULL,
+  occurred_at TIMESTAMPTZ NOT NULL,
+  received_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  mission_id UUID,
+  phase_id UUID,
+  agent_id TEXT,
+  skill_id TEXT,
   repository TEXT,
   commit_sha TEXT,
-  created_at TIMESTAMPTZ NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL,
-  -- rastreabilidade LIVE
-  source TEXT NOT NULL,
-  source_event_id UUID REFERENCES source_events(id),
-  occurred_at TIMESTAMPTZ NOT NULL,
-  received_at TIMESTAMPTZ NOT NULL,
-  verification_state TEXT NOT NULL DEFAULT 'UNVERIFIED'
+  mission_version INTEGER,
+  evidence_ref TEXT,
+  payload JSONB NOT NULL,
+  signature_valid BOOLEAN,
+  schema_version TEXT NOT NULL DEFAULT 'mcf_control_event/v1'
 );
+
+CREATE INDEX idx_source_events_occurred ON source_events(occurred_at DESC);
+CREATE INDEX idx_source_events_type ON source_events(event_type);
+CREATE INDEX idx_source_events_mission ON source_events(mission_id) WHERE mission_id IS NOT NULL;
 ```
 
-**Critério de aceite:**
-Migration rodável, testada localmente, commitada no repositório antes de deploy Supabase.
+Decisão sobre particionamento mensal pode ser delegada a Rafael, mas estrutura base é blocker.
 
 ---
 
-### CORREÇÃO-03: Contrato assinatura/autenticação indefinido
+### ⚠️ NÃO-BLOCKER-1: Falta especificação de projeções MCF
 
-**Arquivo:** `MCF-CONTROL-EVENT-v1.md` linha 48, `E3-CONTROL-CENTER-ARCHITECTURE.md` linha 122
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linhas 52-61.
 
-**Problema:**
-Ambos documentos mencionam "assinatura", "autenticação server-to-server", "secrets server-side", mas **não especificam mecanismo concreto**.
+**Problema:** As projeções MCF (`missions`, `mission_phases`, `agents`, `skills`, `mission_assignments`, `handoffs`, `gates`, `evidence_receipts`, `runtime_snapshots`) são listadas mas não especificadas. Campos, chaves, relações e índices ausentes.
 
-**Impacto:**
-- Endpoint `/api/ingest/mcf` pode aceitar eventos forjados se não houver verificação criptográfica.
-- Runtime precisa saber qual header/método usar para assinar payload.
-- Sem spec, implementações divergem.
-
-**Correção obrigatória:**
-Definir **antes de integração runtime**:
-1. **Mecanismo escolhido:** HMAC-SHA256 com shared secret, ou JWT assinado, ou mTLS client cert.
-2. **Header/formato:** ex. `X-MCF-Signature: sha256=<hex>`, calculado sobre body canônico + timestamp.
-3. **Rotação de secret:** como atualizar sem downtime.
-4. **Replay protection:** timestamp + janela aceitável (ex. ±5min) ou nonce.
+**Impacto:** Rafael precisará inventá-las ou voltar para SOFIA/MESTRE. Não bloqueia início de E4 porque GitHub pode ser implementado primeiro, mas atrasa integração MCF.
 
 **Recomendação:**
-HMAC-SHA256 com `X-MCF-Signature` e `X-MCF-Timestamp`, validação server-side antes de persistir evento.
+Antes de handoff para Rafael, adicionar ao documento esquema mínimo de cada projeção com:
+- chaves primárias e estrangeiras;
+- campos de rastreamento LIVE (`source_event_id`, `last_updated_at`);
+- índices de leitura esperados pelo cockpit.
 
-**Critério de aceite:**
-Especificação em contrato versionado + implementação teste unitário da validação.
-
----
-
-### CORREÇÃO-04: Estratégia de idempotência não detalhada
-
-**Arquivo:** `MCF-CONTROL-EVENT-v1.md` linha 45
-
-**Problema:**
-Contrato declara `eventId` deve ser idempotente, mas não especifica:
-- Como `eventId` é gerado (UUID v4? v5 baseado em conteúdo? ulid?)
-- Como ingest detecta duplicata (unique constraint? cache? bloom filter?)
-- O que acontece quando duplicata chega (201 aceito? 200 já existia? 409 conflito?)
-
-**Impacto:**
-Runtime pode reenviar evento legítimo (retry de rede) e Control Center pode:
-- criar entrada duplicada (corrompe ledger);
-- rejeitar evento válido (perde dado);
-- responder ambiguamente (runtime não sabe se persistiu).
-
-**Correção obrigatória:**
-Antes de E4, definir:
-1. **Formato `eventId`:** UUID v5 baseado em (missionId + eventType + occurredAt + nonce-determinístico), ou ulid monotônico.
-2. **Detecção:** unique constraint em `source_events(event_id)`.
-3. **Resposta HTTP:** `201 Created` (novo), `200 OK` (duplicata aceita anteriormente, retorna receipt existente).
-
-**Critério de aceite:**
-Teste de integração que envia mesmo evento 2x e verifica ledger contém 1 linha + ambas respostas HTTP retornam receipt idêntico.
+Pode ser delegado para subagente especialista antes de E4 ou feito colaborativamente com Rafael em início de E4.
 
 ---
 
-## RISCOS
+### ⚠️ NÃO-BLOCKER-2: GitPulse baseline não tem contrato de preservação
 
-### RISCO-01: GitHub webhook não configurado inicialmente
-**Severidade:** MÉDIA
-**Descrição:** Arquitetura descreve webhook (linhas 91-99) mas estratégia de entrega (linhas 148-157) não menciona configuração GitHub App/webhook antes de E4.
-**Mitigação:** Preservar polling GitPulse como baseline funcional até webhook estar operacional. Documentar passo de criação GitHub webhook em runbook E4.
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 85.
 
-### RISCO-02: Supabase Realtime latência/custo
-**Severidade:** BAIXA
-**Descrição:** Realtime cobra por conexão simultânea. Múltiplas abas/usuários podem exceder tier gratuito rapidamente.
-**Mitigação:** Implementar polling fallback desde início (já declarado linha 44). Monitorar uso Supabase antes de escalar convites.
+**Problema:** "Preservar o GitPulse como baseline funcional" não define **como** preservar: branch separada? tag? snapshot em diretório paralelo? Se a refatoração for incremental no mesmo código, há risco de regressão silenciosa.
 
-### RISCO-03: Rate limit GitHub API pública
-**Severidade:** MÉDIA (conhecida de E2)
-**Descrição:** GitPulse baseline usa API pública sem auth (60 req/hora/IP). E2 identificou como GITPULSE-04.
-**Mitigação:** Backend server-side deve usar GitHub Personal Access Token ou GitHub App com rate limit 5000 req/hora. Não expor token no frontend.
+**Recomendação:**
+Definir estratégia explícita:
+- **Opção A (conservadora):** Tag `gitpulse-baseline-v1` antes de qualquer mudança; branch `legacy/gitpulse` congelada.
+- **Opção B (incremental):** Feature flags para habilitar novo backend GitHub sem remover polling antigo até validação.
 
-### RISCO-04: Migração futura VPS subestimada
-**Severidade:** BAIXA
-**Descrição:** Documento assume portabilidade simples (linhas 128-145), mas omite complexidade de:
-- self-host Supabase Realtime (Elixir/Phoenix, não trivial);
-- replicação Postgres failover;
-- certificados SSL/domínio;
-- CI/CD próprio.
-
-**Mitigação:** Não é blocker para E3/E4. Documentar dependências Supabase-specific antes de migração. Considerar Supabase self-hosted ou substituir Realtime por Server-Sent Events padrão.
-
-### RISCO-05: Falta auditoria de segurança independente
-**Severidade:** MÉDIA
-**Descrição:** Arquitetura menciona autenticação/secrets mas nenhum gate de revisão de segurança antes de habilitar comandos (linha 157 "somente depois habilitar comandos").
-**Mitigação:** Escalar para Emily auditoria de suficiência quando auth for implementado e antes de habilitar qualquer endpoint de escrita/comando.
+Não bloqueia E4 porque GitPulse já existe e funciona; decisão pode ser tomada por Rafael/LÉO em início de implementação.
 
 ---
 
-## CRITÉRIOS DE INTEGRAÇÃO
+### ⚠️ NÃO-BLOCKER-3: Reconciliação GitHub não especificada
 
-Antes de declarar E4 concluído e permitir integração runtime-to-control em ambiente não-local, as seguintes condições devem ser satisfeitas:
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 99.
 
-### Pré-requisitos técnicos
-1. ✅ **Schema Postgres completo** commitado e aplicado (BLOCKER-02).
-2. ✅ **Payload schemas MCF** definidos para eventos críticos (BLOCKER-01).
-3. ✅ **Mecanismo assinatura** especificado e implementado (CORREÇÃO-03).
-4. ✅ **Idempotência** testada com evento duplicado (CORREÇÃO-04).
-5. ✅ **GitHub backend server-side** usando token autenticado, não API pública (RISCO-03).
+**Problema:** "Um job de reconciliação periódico pode conferir divergências sem ser a fonte primária" não define:
+- frequência (horária? diária?);
+- scope (só missões ativas? todo histórico?);
+- ação em caso de divergência (alert? auto-correção? log?).
 
-### Verificação funcional
-6. ✅ **Ingest API** aceita evento MCF válido, persiste em `source_events`, atualiza projeção, retorna receipt.
-7. ✅ **Ingest API** rejeita evento com assinatura inválida (401/403).
-8. ✅ **Ingest API** aceita evento duplicado idempotente (200 + receipt existente).
-9. ✅ **UI Control Center** renderiza projeção com rastreabilidade LIVE verificável (source, event_id, occurred_at, received_at exibidos ou auditáveis).
-10. ✅ **Realtime ou polling** propaga mudança de projeção para UI sem refresh manual.
+**Recomendação:**
+Definir contrato mínimo do reconciliador:
+1. **Frequência:** 1x/dia às 3 AM UTC;
+2. **Scope:** PRs/issues abertos + último commit de cada branch ativa;
+3. **Ação:** log de divergência em tabela `reconciliation_alerts`; humano decide correção.
 
-### Gates de segurança
-11. ✅ **Nenhum secret** commitado no repositório público.
-12. ✅ **Variáveis ambiente** documentadas em `.env.example` sem valores reais.
-13. ✅ **Endpoint público** (se houver) expõe somente dados GitHub públicos até auth estar ativo.
-14. 🔒 **Auditoria de segurança** por Emily antes de habilitar comandos de escrita (fora de E4, gate de fase futura).
+Não bloqueia E4 porque webhook é fonte primária; reconciliador é safety net futuro.
 
 ---
 
-## HANDOFF PARA RAFAEL
+### ⚠️ NÃO-BLOCKER-4: Realtime fallback para polling não especificado
 
-**De:** SOFIA (Arquitetura de Software)
-**Para:** RAFAEL (Engenharia de Software)
-**Missão:** MCF-CONTROL-CENTER-001
-**Transição:** E3 → E4
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 44.
 
-### Contexto
-Arquitetura E3 foi aprovada com correções obrigatórias. Stack e design estrutural estão sólidos. Portabilidade futura preservada.
+**Problema:** "Polling fica como fallback, não como mecanismo primário" não define quando fallback ativa nem como UI detecta falha de Realtime.
 
-### Decisões arquiteturais vinculantes para E4
+**Recomendação:**
+Adicionar regra de degradação:
+- UI detecta perda de Realtime (heartbeat ausente por >30s ou erro de conexão);
+- ativa polling de `/api/state/summary` a cada 10s;
+- exibe banner "Modo Degradado — Realtime indisponível";
+- tenta reconectar Realtime exponencialmente (5s, 10s, 20s, max 60s).
 
-1. **Event ledger é imutável.** Nenhuma operação UPDATE ou DELETE em `source_events`. Correção de dado via evento compensatório.
-
-2. **Projeções são derivadas.** Tabelas de projeção (missions, phases, agents, etc.) são materializadas a partir de eventos. Se houver inconsistência, reconstruir projeção a partir do ledger.
-
-3. **Regra LIVE é obrigatória.** Todo campo marcado LIVE no UI deve ter `source`, `source_event_id`, `occurred_at`, `received_at`, `verification_state` rastreáveis. Se origem indisponível, UI exibe `STALE`/`DEGRADED`/`UNKNOWN`.
-
-4. **Ingest API falha fechada.** Schema inválido, assinatura ausente/incorreta, replay fora de janela → rejeitar com 4xx, não persistir evento malformado.
-
-5. **GitHub backend server-side.** Baseline GitPulse polling pode ser preservado como fallback, mas produção deve usar webhook + GitHub token autenticado no backend, não API pública do frontend.
-
-6. **Secrets exclusivamente server-side.** Nenhum token, API key, database password no código frontend ou variável exposta ao browser.
-
-7. **Migrations versionadas.** Todo schema change via migration numerada e commitada. Rollback deve ser possível (ou documentado como irreversível com procedimento manual).
-
-8. **Adaptador Realtime isolado.** Camada de domínio não deve importar diretamente `@supabase/supabase-js` Realtime. Criar interface abstrata para permitir substituição futura por SSE/WebSocket padrão.
-
-### Artefatos obrigatórios antes de integração runtime
-
-**BLOCKER-01 — Payload schemas MCF:**
-- JSON Schema ou TypeScript interface para cada `eventType` listado em `MCF-CONTROL-EVENT-v1.md`.
-- No mínimo: `MISSION_CREATED`, `MISSION_STATE_CHANGED`, `PHASE_STARTED`, `PHASE_COMPLETED`, `HANDOFF_CREATED`, `GATE_OPENED`, `GATE_RESOLVED`, `EVIDENCE_ACCEPTED`, `EVIDENCE_REJECTED`.
-- Commitar em `docs/contracts/MCF-CONTROL-EVENT-v1.md` atualizado ou arquivo separado `MCF-EVENT-PAYLOADS-v1.md`.
-
-**BLOCKER-02 — Schema Postgres:**
-- DDL completo para todas as tabelas: `source_events`, `ingest_receipts`, `missions`, `mission_phases`, `agents`, `skills`, `mission_assignments`, `handoffs`, `gates`, `evidence_receipts`, `runtime_snapshots`, `github_repositories`, `github_pull_requests`, `github_issues`, `github_releases`, `github_activity`.
-- Campos de rastreabilidade LIVE em todas as projeções: `source`, `source_event_id`, `occurred_at`, `received_at`, `verification_state`.
-- Chaves primárias, foreign keys, índices críticos (ex. `source_events(event_id)` unique, `missions(mission_code)` unique).
-- Diagrama ER para relações entre missions/phases/agents/handoffs/gates.
-- Migration inicial `001_initial_schema.sql` commitada em `db/migrations/`.
-
-**CORREÇÃO-03 — Autenticação/assinatura:**
-- Especificar mecanismo: recomendo HMAC-SHA256 com `X-MCF-Signature` e `X-MCF-Timestamp`.
-- Documentar formato header, algoritmo hash, janela replay aceitável (ex. ±5min).
-- Implementar validação server-side em `/api/ingest/mcf` antes de persistir evento.
-- Teste unitário de assinatura válida/inválida/expirada.
-
-**CORREÇÃO-04 — Idempotência:**
-- Especificar formato `eventId`: UUID v5 ou ulid.
-- Implementar unique constraint `source_events(event_id)`.
-- Definir resposta HTTP: `201 Created` (novo) vs `200 OK` (duplicata, retorna receipt existente).
-- Teste de integração enviando mesmo evento 2x, verificar ledger contém 1 linha.
-
-### Falhas conhecidas do baseline (de E2)
-- **GITPULSE-01:** card Issues conta PRs também. Corrigir consultando `GET /repos/{owner}/{repo}/issues?state=open` filtrado.
-- **GITPULSE-02:** card Commits mostra watchers. Renomear ou implementar contagem commits real (GitHub API `GET /repos/{owner}/{repo}/commits?since=<30d>`).
-- **GITPULSE-03:** polling parcial (só eventos). Backend deve reconciliar PRs/releases periodicamente ou via webhook.
-- **GITPULSE-04:** API pública rate limit. Backend deve usar GitHub PAT ou App.
-
-### Estratégia de entrega recomendada
-
-**Fase 1 — Fundação (E4 mínimo viável):**
-1. Setup Vercel project + Supabase project + environment variables.
-2. Aplicar migration inicial Postgres.
-3. Implementar `/api/ingest/mcf` com validação schema + assinatura + idempotência.
-4. Teste manual: enviar evento `MISSION_CREATED` via `curl`, verificar `source_events` e projeção `missions`.
-5. Implementar UI shell Control Center renderizando projeções Postgres (sem Realtime ainda).
-6. Verificar rastreabilidade LIVE exibida no UI (source, event_id, timestamps).
-
-**Fase 2 — GitHub integração:**
-7. Implementar `/api/ingest/github` recebendo webhook payload GitHub.
-8. Configurar webhook no repositório `leon337/multiagent-collaboration-framework`.
-9. Mapear eventos GitHub (push, pull_request, issues, release) para `source_events` + projeções GitHub.
-10. Preservar baseline GitPulse como módulo separado, apontar para projeções backend em vez de API pública frontend.
-11. Corrigir GITPULSE-01, 02, 03, 04.
-
-**Fase 3 — Realtime:**
-12. Ativar Supabase Realtime nas tabelas de projeção relevantes.
-13. Implementar adaptador abstrato (interface TypeScript) isolando lógica Supabase.
-14. Conectar UI a subscriptions Realtime.
-15. Testar: criar evento no backend, verificar UI atualiza sem refresh.
-16. Implementar polling fallback caso Realtime falhe.
-
-**Fase 4 — Autenticação (fora de E4, gate de fase futura):**
-17. Implementar Supabase Auth ou NextAuth.
-18. Proteger endpoints sensíveis e dados operacionais MCF.
-19. **Escalar para Emily** auditoria de segurança antes de habilitar comandos.
-
-### Critérios de aceite E4
-- ✅ Todos os BLOCKERS resolvidos e commitados.
-- ✅ Ingest API aceitando evento MCF válido e rejeitando inválido.
-- ✅ UI renderizando projeção com rastreabilidade LIVE.
-- ✅ GitHub webhook configurado e eventos persistindo.
-- ✅ Baseline GitPulse integrado ao backend (não API pública frontend).
-- ✅ Realtime ou polling propagando mudanças sem refresh manual.
-- ✅ Nenhum secret commitado, `.env.example` documentado.
-- ✅ README atualizado com instruções setup local Vercel + Supabase.
-
-### Riscos delegados a Rafael validar
-- **RISCO-02:** monitorar uso Supabase Realtime tier gratuito.
-- **RISCO-04:** documentar dependências Supabase-specific para futura migração VPS.
-
-### Pergunta arquitetural em aberto
-**Não bloqueia E4**, mas Rafael deve considerar:
-
-- **Reconciliação periódica GitHub:** se webhook falhar ou evento for perdido, como detectar divergência entre GitHub real e projeções Control Center? Recomendo job diário que consulta GitHub API e compara checksums (ex. último SHA de cada PR, último evento timestamp) sem sobrescrever ledger, gerando alerta de inconsistência.
+Pode ser implementado progressivamente; não bloqueia primeiro deploy read-only.
 
 ---
 
-**Status E3:** APROVADO COM CORREÇÕES OBRIGATÓRIAS
-**Próximo responsável:** RAFAEL (Engenharia de Software)
-**Próxima etapa:** E4 — Implementação Vercel + Supabase
-**Retorno a:** MESTRE/LÉO para coordenação de continuidade
+### ⚠️ NÃO-BLOCKER-5: Boundary de comandos futuros não detalhado
+
+**Localização:** `E3-CONTROL-CENTER-ARCHITECTURE.md`, linha 125.
+
+**Problema:** "A ação deve atravessar o boundary governado do MCF e retornar receipt verificável" não define como comandos serão roteados:
+- UI → API Vercel → MCF Runtime via webhook?
+- UI → API Vercel → fila → MCF Runtime poll?
+- UI → API Vercel que cria `command_request` e aguarda evento `COMMAND_COMPLETED`?
+
+**Recomendação:**
+Não precisa ser resolvido antes de E4 porque comandos estão explicitamente fora de scope de E3. Quando chegar essa fase, SOFIA deve revisar contrato de comando antes de implementação.
 
 ---
 
-**SOFIA · Arquitetura de Software · MCF**
-*2026-09-02T19:23:51Z*
+## 4. RISCOS E ACOPLAMENTOS
+
+### 4.1 Dependência de Supabase Realtime
+**Risco:** Se Supabase Realtime tiver mudança incompatível de API ou limite de conexões insuficiente, toda experiência "live" quebra.
+
+**Mitigação proposta:** Adaptador isolado (`lib/realtime-adapter.ts`) + fallback para polling já previsto. Aceitável.
+
+### 4.2 Rate limit de GitHub webhooks
+**Risco:** GitHub não garante entrega imediata nem ordenada de webhooks. Em rajada de eventos (ex: merge de 50 PRs), pode haver delay ou perda.
+
+**Mitigação proposta:** Job de reconciliação periódico detecta divergências. Aceitável para primeira versão; escala futura pode exigir fila durável entre webhook e ingest.
+
+### 4.3 Explosão de `source_events`
+**Risco:** Sem TTL ou particionamento, tabela cresce indefinidamente. 1 milhão de eventos = ~1 GB de JSONB; pode afetar índices e backup.
+
+**Mitigação ausente:** BLOCKER-2 obriga especificação de índices; decisão de TTL/particionamento pode ser delegada a Rafael com monitoramento nos primeiros 3 meses.
+
+### 4.4 Acoplamento entre projeções MCF e domínio do runtime
+**Risco:** Se estrutura de `missions`, `gates`, `handoffs` no Control Center divergir do modelo mental do MCF Runtime, eventos não vão projetar corretamente e UI exibirá estado inconsistente.
+
+**Mitigação proposta:** Contrato explícito MCF-CONTROL-EVENT-v1 como boundary. **Recomendação adicional:** Antes de E4, fazer workshop de alinhamento SOFIA + LÉO + Rafael sobre semântica de `GATE_OPENED` vs. `GATE_RESOLVED`, `HANDOFF_CREATED` vs. agent transition, etc.
+
+---
+
+## 5. FRONTEIRAS E CONTRATOS A ENDURECER
+
+### 5.1 `/api/ingest/mcf`
+**Status:** DRAFT.
+**Falta definir:**
+- autenticação/assinatura (BLOCKER-1);
+- resposta de sucesso/erro (200 com receipt ID? 202 accepted? 400 schema inválido?);
+- idempotência (rejeitar `event_id` duplicado ou retornar receipt anterior?);
+- rate limit (quantos eventos/min o runtime pode enviar?).
+
+**Handoff para Rafael:** Após correção de BLOCKER-1, criar spec OpenAPI do endpoint.
+
+---
+
+### 5.2 `/api/webhooks/github`
+**Status:** IMPLÍCITO, não especificado.
+**Falta definir:**
+- quais eventos GitHub são aceitos (`pull_request`, `push`, `issues`, `release`?);
+- validação de assinatura `X-Hub-Signature-256`;
+- mapeamento de evento GitHub → `source_events` (qual `eventType` corresponde a `pull_request.opened`?).
+
+**Handoff para Rafael:** Criar tabela de mapeamento GitHub webhook → `source_events.event_type`.
+
+---
+
+### 5.3 Schema de projeções MCF
+**Status:** LISTADO, não especificado (NÃO-BLOCKER-1).
+**Ação:** Delegar para subagente ou workshop antes de E4.
+
+---
+
+### 5.4 Contrato de Realtime
+**Status:** AUSENTE.
+**Falta definir:**
+- quais tabelas devem emitir notificação (`missions`, `github_pull_requests`?);
+- filtros de subscrição no cliente (por `missionId`? por `repository`?);
+- formato de mensagem Realtime vs. fetch manual.
+
+**Handoff para Rafael:** Documentar em `docs/contracts/REALTIME-SUBSCRIPTIONS-v1.md` antes de conectar UI.
+
+---
+
+## 6. CRITÉRIOS DE INTEGRAÇÃO PARA E4
+
+Antes de considerar E4 completo, estas condições devem ser verificadas:
+
+### 6.1 GitHub server-side
+- [ ] `/api/webhooks/github` recebe e valida assinatura GitHub;
+- [ ] eventos GitHub persistem em `source_events`;
+- [ ] projeções `github_pull_requests`, `github_issues` atualizam transacionalmente;
+- [ ] UI exibe dados de GitHub com rastreamento LIVE (source, timestamp, commit SHA);
+- [ ] fallback de polling permanece funcional se webhook falhar;
+- [ ] baseline GitPulse preservado (tag ou branch).
+
+### 6.2 MCF Runtime outbound
+- [ ] `/api/ingest/mcf` valida assinatura conforme BLOCKER-1 corrigido;
+- [ ] eventos MCF persistem em `source_events`;
+- [ ] projeções `missions`, `mission_phases`, `agents` atualizam corretamente;
+- [ ] UI Mission Control exibe estado de missão com rastreamento LIVE;
+- [ ] idempotência de `event_id` funciona (reenvio não duplica);
+- [ ] evento com schema inválido retorna erro claro e não persiste.
+
+### 6.3 Realtime + fallback
+- [ ] mudanças nas projeções propagam para UI via Supabase Realtime em <2s;
+- [ ] UI detecta perda de Realtime e ativa polling;
+- [ ] UI exibe banner "Modo Degradado" quando em fallback;
+- [ ] reconexão automática funciona após falha temporária.
+
+### 6.4 Regra LIVE
+- [ ] todo campo marcado LIVE no UI tem tooltip ou metadata mostrando `source`, `occurred_at`, `received_at`;
+- [ ] se projeção não tem `source_event_id` válido, UI exibe `STALE` ou `UNKNOWN`;
+- [ ] nenhum dado inventado ou simulado é exibido como LIVE.
+
+### 6.5 Portabilidade
+- [ ] migrations SQL versionadas em `supabase/migrations/`;
+- [ ] nenhuma função proprietária Vercel em lógica de domínio;
+- [ ] URLs e secrets em `.env` com `.env.example` documentado;
+- [ ] adaptador de Realtime isolado em `lib/realtime-adapter.ts`;
+- [ ] README tem seção "Deploy alternativo" com instruções para VPS + PostgreSQL.
+
+### 6.6 Segurança pre-auth
+- [ ] nenhuma variável de ambiente secreta exposta no bundle do cliente;
+- [ ] dados de MCF só retornam após futura autenticação (pode retornar mock ou vazio em E4);
+- [ ] dados públicos de GitHub podem ser exibidos sem autenticação.
+
+---
+
+## 7. HANDOFF PARA RAFAEL
+
+Rafael (Engenharia de Software), a arquitetura está estruturalmente aprovada com as correções obrigatórias listadas. Seu trabalho em E4:
+
+### Pré-requisitos imediatos
+1. **BLOCKER-1:** SOFIA ou MESTRE deve especificar autenticação/assinatura do envelope MCF antes de você implementar `/api/ingest/mcf`. Não invente; aguarde decisão.
+2. **BLOCKER-2:** Implemente schema de `source_events` conforme especificação que SOFIA adicionará ao documento ou conforme SQL sugerido nesta revisão. Confirme decisão sobre TTL/particionamento com LÉO.
+
+### Seu scope de E4
+- Criar estrutura Next.js/TypeScript no Vercel com projeto Supabase conectado;
+- Migrations SQL para `source_events`, `ingest_receipts` e projeções iniciais (GitHub primeiro, MCF depois);
+- Implementar `/api/webhooks/github` com validação de assinatura e persistência;
+- Implementar `/api/ingest/mcf` conforme contrato corrigido (aguardar BLOCKER-1);
+- Conectar Supabase Realtime no cliente com adaptador isolado;
+- Criar UI básico de Mission Control e GitPulse lendo projeções;
+- Implementar fallback de polling conforme NÃO-BLOCKER-4;
+- Implementar regra LIVE com rastreamento de fonte em tooltip/metadata;
+- Documentar deploy alternativo para portabilidade futura.
+
+### O que NÃO fazer
+- Não crie comandos/escrita ainda; apenas observação;
+- Não presuma schema de projeções MCF sem alinhamento (NÃO-BLOCKER-1);
+- Não contorne autenticação/assinatura; aguarde spec;
+- Não use funções proprietárias Vercel em lógica de domínio.
+
+### Handoff para Emily (auditoria)
+Após implementação de E4, Emily deve auditar:
+- validação de assinatura GitHub e MCF;
+- ausência de secrets no bundle cliente;
+- idempotência de ingest;
+- integridade de `source_events` append-only;
+- rastreamento LIVE completo.
+
+---
+
+**Status final:** Arquitetura pronta para E4 após correção de BLOCKER-1 e BLOCKER-2. SOFIA permanece disponível para alinhamento de projeções MCF (NÃO-BLOCKER-1) e revisão de contratos de comando futuros.
