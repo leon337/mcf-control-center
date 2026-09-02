@@ -52,6 +52,8 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Active visual evidence: `docs/evidence/agents/RAFAEL-E3-HARNESS-VISUAL.png`
 - Harness snapshot: `docs/evidence/agents/RAFAEL-E3-HARNESS-SNAPSHOT.json`
 - Snapshot SHA-256: `d57d77ac8bbd138115caa1863428db0a54e5d7e7800db157d0fa2928a2ae2a64`
+- Real Harness window capture (active): `docs/evidence/agents/RAFAEL-E3-HARNESS-WINDOW-ACTIVE.png`
+- Window capture SHA-256: `0e6b39103f85aa8fcde820b37af04a9377601aaa49e23763bbef3655526b5280`
 
 ## RICARDO / EMILY
 
