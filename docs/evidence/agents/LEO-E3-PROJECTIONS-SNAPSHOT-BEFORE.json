@@ -1,0 +1,15 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B-remediation",
+  "agent": "LÉO",
+  "sessionId": "session-f291a842-c703-4f22-9723-6e699395d782",
+  "preset": "mcf-leo",
+  "title": "LÉO — MCF-CONTROL-CENTER-001 — E3 — PROJECTION SEMANTICS",
+  "running": false,
+  "blank": true,
+  "cwd": "/tmp/mcf-control-center-e3-projections-leo",
+  "provider": "z-ai",
+  "model": "glm-4.7-flash",
+  "promptSent": false,
+  "task": "projection semantics / ordering / TTL gate"
+}
