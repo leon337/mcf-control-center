@@ -77,7 +77,15 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Prompt SHA-256: `b9151a12bd6cd2305a0f771fa9c3183ab1941af033eb337f371583171cebfae0`
 - Pre-handoff snapshot: `docs/evidence/agents/RICARDO-E3-HARNESS-SNAPSHOT-BEFORE-OFFICIAL.json`
 - Pre-handoff visual: `docs/evidence/agents/RICARDO-E3-HARNESS-VISUAL-BEFORE-OFFICIAL.png`
-- Status: `running` — official security review after corrected Rafael handoff.
+- Status: `completed` — official security review after corrected Rafael handoff.
+- Decision: `APROVADO COM CORREÇÕES CRÍTICAS OBRIGATÓRIAS`.
+- Official review: `docs/reviews/agents/RICARDO-E3-SECURITY-REVIEW.md`.
+- Official review SHA-256: `9153c522f8bcc2c45aa68a6f6cd1e607b586a94859a45cd78d5abc99d42a631c`.
+- Final assistant event seq: `11034`.
+- Final Harness snapshot: `docs/evidence/agents/RICARDO-E3-HARNESS-SNAPSHOT-FINAL.json`.
+- Real Harness window capture after completion: `docs/evidence/agents/RICARDO-E3-HARNESS-WINDOW-FINAL.png`.
+- Human permission request to write `SECURITY-REVIEW-RICARDO.md` was explicitly denied by LEANDRO/MESTRE; Ricardo completed by chat only.
+- Provenance: final review was extracted directly from assistant event `11034` of the official session.
 
 ## EMILY
 

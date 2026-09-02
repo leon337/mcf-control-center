@@ -1,0 +1,18 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B",
+  "agent": "RICARDO",
+  "canonical": true,
+  "sessionId": "session-1309a6bd-e33f-490b-8afa-d2b3783f430b",
+  "preset": "mcf-ricardo",
+  "title": "RICARDO — MCF-CONTROL-CENTER-001 — E3 — OFFICIAL HANDOFF RAFAEL",
+  "running": false,
+  "blank": false,
+  "cwd": "/tmp/mcf-control-center-e3-ricardo-v3",
+  "provider": "z-ai",
+  "model": "glm-4.7-flash",
+  "finalAssistantSeq": 11034,
+  "reviewFile": "docs/reviews/agents/RICARDO-E3-SECURITY-REVIEW.md",
+  "reviewSha256": "9153c522f8bcc2c45aa68a6f6cd1e607b586a94859a45cd78d5abc99d42a631c",
+  "decision": "APROVADO COM CORREÇÕES CRÍTICAS OBRIGATÓRIAS"
+}
