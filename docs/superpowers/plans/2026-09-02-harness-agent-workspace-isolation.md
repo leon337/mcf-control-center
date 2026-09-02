@@ -32,7 +32,7 @@
 
 **Interfaces:**
 - Consumes: Harness read-only `workspace.list` and `session.list` RPCs.
-- Produces: immutable baseline proving the old topology and the unused Sofia pre-call session.
+- Produces: immutable baseline proving the old topology and the completed Sofia pre-Pattern-B session, which is preserved as legacy but excluded from the Pattern B canonical chain.
 
 - [ ] **Step 1: Save current workspace registry**
 
@@ -42,9 +42,9 @@ Call `/api/workspace.list` with RPC method `workspace.list`, payload `{}` and sa
 
 Call `/api/session.list` with RPC method `session.list`, payload `{}` and save the complete successful response.
 
-- [ ] **Step 3: Mark the prepared Sofia session as superseded**
+- [ ] **Step 3: Classify the Sofia pre-Pattern-B execution correctly**
 
-Append a ledger entry stating `session-cc9f372c-193b-4d54-b4c0-ac9d0e6d1273` had `promptSent=false` and is `UNUSED — superseded by Pattern B workspace migration`.
+Preserve the exact final assistant message from `session-cc9f372c-193b-4d54-b4c0-ac9d0e6d1273`, record that the earlier `promptSent=false` snapshot was only a pre-call state, and classify the completed session as `LEGACY PRE-PATTERN-B — excluded from Pattern B canonical chain`.
 
 - [ ] **Step 4: Verify no historical mutation**
 

@@ -107,3 +107,15 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Final Harness snapshot: `docs/evidence/agents/EMILY-E3-HARNESS-SNAPSHOT-FINAL.json`.
 - Final visual evidence: `docs/evidence/agents/EMILY-E3-HARNESS-VISUAL-FINAL.png`.
 - Independence limitation recorded: same Harness/executor, different canonical preset and model; no claim of fully independent infrastructure.
+
+## SOFIA — Projection workshop pre-Pattern-B (legacy)
+
+- Session: `session-cc9f372c-193b-4d54-b4c0-ac9d0e6d1273`.
+- Preset: `mcf-sofia`.
+- CWD: `/tmp/mcf-control-center-e3-projections-sofia`.
+- The earlier pre-call snapshot correctly recorded `promptSent=false` **at capture time**, but the session was subsequently prompted and completed.
+- Final assistant event seq: `3237`.
+- Preserved output: `docs/reviews/agents/SOFIA-E3-PROJECTION-WORKSHOP-REVIEW-PRE-PATTERN-B.md`.
+- Output SHA-256: `94f5e0c658d4a107341892ef95f2906e5c93bc2f37aa9e9dc91e6d2d7a39abc8`.
+- Disposition: `LEGACY PRE-PATTERN-B — completed but excluded from the Pattern B canonical reconciliation chain`.
+- Reason: the session predates the approved persistent workspace-per-agent+mission topology. Its findings may be consulted as historical evidence, but the canonical post-migration SOFIA review will be re-run in the isolated Pattern B workspace.
