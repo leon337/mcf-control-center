@@ -41,20 +41,38 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 
 ## RAFAEL
 
-- Prepared session `session-329f5daa-4b8c-4317-bb57-6ea771cb3064` was cancelled before prompt and renamed `UNUSED — RAFAEL prepared before Sofia handoff`.
-- Active handoff session: `session-339b756b-3e3a-4e4f-8e49-a83d917c5232`
+- Canonical handoff session: `session-339b756b-3e3a-4e4f-8e49-a83d917c5232`
 - Preset: `mcf-rafael`
 - Provider: `nvidia-nim`
 - Model: `deepseek-ai/deepseek-v4-flash-0731`
 - Catalog label: `DeepSeek V4 Flash 0731 — NVIDIA Free Endpoint`
 - Input includes Sofia's completed architecture review.
-- Status: running / engineering review
-- Active visual evidence: `docs/evidence/agents/RAFAEL-E3-HARNESS-VISUAL.png`
-- Harness snapshot: `docs/evidence/agents/RAFAEL-E3-HARNESS-SNAPSHOT.json`
-- Snapshot SHA-256: `d57d77ac8bbd138115caa1863428db0a54e5d7e7800db157d0fa2928a2ae2a64`
-- Real Harness window capture (active): `docs/evidence/agents/RAFAEL-E3-HARNESS-WINDOW-ACTIVE.png`
-- Window capture SHA-256: `0e6b39103f85aa8fcde820b37af04a9377601aaa49e23763bbef3655526b5280`
+- Status: `completed` — official E3 engineering handoff.
+- Official review: `docs/reviews/agents/RAFAEL-E3-ENGINEERING-REVIEW.md`
+- Official review SHA-256: `bbe49a48ffceee9ad6a31660d27c9b7312fe7bdf29f08bd569564c8d88b66be0`
+- Final assistant event seq: `4644`
+- Final Harness snapshot: `docs/evidence/agents/RAFAEL-E3-HARNESS-SNAPSHOT-FINAL.json`
+- Final visual evidence: `docs/evidence/agents/RAFAEL-E3-HARNESS-VISUAL-FINAL.png`
+- Real Harness window capture while active: `docs/evidence/agents/RAFAEL-E3-HARNESS-WINDOW-ACTIVE.png`
+- Provenance check: official review content matches the final assistant text of `session-339b...` ignoring only the repository's final newline.
 
-## RICARDO / EMILY
+### Rafael duplicate / alternate sessions
 
-Canonical sessions are prepared but have not received mission prompts yet. They will only be dispatched after the preceding handoff evidence exists.
+- `session-329f5daa-4b8c-4317-bb57-6ea771cb3064` — `UNUSED`, prepared before Sofia handoff.
+- `session-648426d3-528f-447a-9bea-bf00144ed70f` — canonical preset but duplicate execution; renamed `ALTERNATE — RAFAEL E3 duplicate — not canonical chain`.
+- Its output is preserved as `docs/reviews/agents/RAFAEL-E3-ENGINEERING-REVIEW-ALTERNATE-session-648.md` but is **not** the official handoff.
+
+## RICARDO
+
+- `session-2a2779d8-c8c1-4acd-ba7b-52983fa25f09` — legacy security review from before the current evidence chain; renamed `LEGACY` and not reused.
+- `session-fbbf4293-dba9-40ca-b565-5a7334ae0b01` — prepared blank session; renamed `UNUSED — RICARDO prepared before Rafael handoff`.
+- `session-a7f7588a-c41b-4b6e-aa96-563d6ad8ba1e` — **INVALIDATED and cancelled** after provenance check proved its handoff used Rafael's alternate `session-648` review instead of the official `session-339` output.
+- The invalidated call is retained as evidence of the detected provenance mismatch; none of its output is accepted in the mission chain.
+- Next action: create a fresh `mcf-ricardo` session with the corrected official Rafael review and new pre-handoff visual evidence.
+
+## EMILY
+
+- Prepared blank session: `session-097431f9-f27b-49e4-8aff-348ebc341be7` (`mcf-emily`).
+- No mission prompt accepted yet in the current chain.
+- Emily will only be dispatched after Ricardo's corrected handoff is completed and evidenced.
+
