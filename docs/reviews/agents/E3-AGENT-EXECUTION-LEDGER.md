@@ -142,3 +142,28 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Pre-call evidence: `docs/evidence/agents/SOFIA-E3C-PATTERN-B-SNAPSHOT-BEFORE.json` + `SOFIA-E3C-PATTERN-B-VISUAL-BEFORE.png`.
 - Prompt evidence: `docs/evidence/agents/SOFIA-E3C-PATTERN-B-PROMPT.txt` (SHA recorded in snapshot).
 - Status at this ledger checkpoint: `PREPARED — prompt not yet sent`.
+
+## SOFIA — E3C Pattern B canonical completion
+
+- Session: `session-7c6fe628-cbe2-4d14-b493-2d82b1686a84`.
+- Workspace: `MCF-CONTROL-CENTER-001 — SOFIA` (`/var/tmp/mcf-control-center-001/sofia`).
+- Preset: `mcf-sofia`; permission: `read-only`.
+- Provider/model: `nine-router-kiro / kr/claude-sonnet-4.5`.
+- Final assistant event seq: `2649`; history complete; `running=false`.
+- Canonical review: `docs/reviews/agents/SOFIA-E3-PROJECTION-WORKSHOP-REVIEW.md`.
+- Review SHA-256: `dc0d56e70c2bba5620ecfe3f16cd9dadb6f9a0000e0244825380f86f28945253`.
+- Final snapshot: `docs/evidence/agents/SOFIA-E3-PATTERN-B-SNAPSHOT-FINAL.json`.
+- Disposition: `CANONICAL PATTERN-B — COMPLETE`.
+
+## RAFAEL — E3C Pattern B canonical completion
+
+- Session: `session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f`.
+- Workspace: `MCF-CONTROL-CENTER-001 — RAFAEL` (`/var/tmp/mcf-control-center-001/rafael`).
+- Preset: `mcf-rafael`; permission: `read-only`.
+- Provider/model: `nvidia-nim / deepseek-ai/deepseek-v4-flash-0731`.
+- Final assistant event seq: `4146`; history complete; `running=false`.
+- Canonical review: `docs/reviews/agents/RAFAEL-E3-PATTERN-B-ENGINEERING-REVIEW.md`.
+- Review SHA-256: `b83f592c6898be312a4c4f2fe536b7c9b8082916d3050759776f72f3214e76c2`.
+- Final snapshot: `docs/evidence/agents/RAFAEL-E3-PATTERN-B-SNAPSHOT-FINAL.json`.
+- Visual evidence: API-derived `RAFAEL-E3-PATTERN-B-VISUAL-BEFORE.svg` and `RAFAEL-E3-PATTERN-B-VISUAL-FINAL.svg`; no GUI interaction.
+- Disposition: `CANONICAL PATTERN-B — COMPLETE`.

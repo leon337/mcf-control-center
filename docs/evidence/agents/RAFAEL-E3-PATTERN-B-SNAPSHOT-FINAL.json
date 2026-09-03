@@ -1,0 +1,40 @@
+{
+  "evidenceType": "Harness API final snapshot",
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3C",
+  "pattern": "B",
+  "agent": "RAFAEL",
+  "sessionId": "session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f",
+  "workspaceId": "946f8704-60a9-432b-9512-60f275a9e9ec",
+  "workspaceTitle": "MCF-CONTROL-CENTER-001 — RAFAEL",
+  "cwd": "/var/tmp/mcf-control-center-001/rafael",
+  "agentPreset": "mcf-rafael",
+  "running": false,
+  "blank": false,
+  "permission": "read-only",
+  "provider": "nvidia-nim",
+  "model": "deepseek-ai/deepseek-v4-flash-0731",
+  "finalAssistantSeq": 4146,
+  "historyHasMore": false,
+  "reviewBytes": 17996,
+  "reviewSha256": "b83f592c6898be312a4c4f2fe536b7c9b8082916d3050759776f72f3214e76c2",
+  "workspaceSessionIds": [
+    "session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f"
+  ],
+  "sessionStats": {
+    "turns": 1,
+    "steps": 10,
+    "llmMs": 1037983,
+    "toolMs": 926,
+    "ttftMs": 78879,
+    "ttftSteps": 10,
+    "decodeMs": 959104,
+    "decodeTokens": 13108
+  },
+  "tokenUsage": {
+    "uncachedInputTokens": 174724,
+    "outputTokens": 13108,
+    "cacheReadTokens": 33792,
+    "cacheWriteTokens": 0
+  }
+}
