@@ -119,10 +119,11 @@ Transformar os artefatos vivos do WorkBuddy em um cockpit operacional real do MC
 
 ## Estado atual
 
-- Etapa concluída: **E3 — Arquitetura do MCF Control Center**.
-- Etapa atual: **E4 — Fundação Vercel + Supabase / shell Next.js validado localmente**.
-- Status: **LOCAL_VALIDATION_PASS / AWAITING VERCEL DEPLOY HUMAN_GATE**.
+- Etapa concluída: **E4 — Fundação Vercel + Supabase / primeiro shell público validado**.
+- Etapa atual: **E5 — GitPulse vivo / ainda não iniciada**.
+- Status: **VERCEL_DEPLOY_PASS / PUBLIC_BASELINE_ONLINE**.
 - Pattern B: workspaces isolados por agente + missão, com contexto explícito por handoff.
 - Supabase: projeto `mcf-control-center` ativo em `sa-east-1`, ledger mínimo aplicado e validado.
-- Web shell: Next.js local com baselines preservados, build/testes/smoke visual aprovados.
-- Próximo gate: LEANDRO autorizar ou negar o primeiro deploy/public URL na Vercel.
+- Web shell: Next.js publicado em `https://mcf-control-center.vercel.app`, com baselines preservados e smoke público aprovado.
+- Observabilidade LIVE: **ainda não conectada**; Mission Control e GitPulse publicados continuam sendo baselines preservados.
+- Próxima etapa: E5 conectar GitPulse a dados reais por integrações server-side, sem alterar a semântica de `LIVE`.
