@@ -120,6 +120,8 @@ Transformar os artefatos vivos do WorkBuddy em um cockpit operacional real do MC
 ## Estado atual
 
 - Etapa concluída: **E3 — Arquitetura do MCF Control Center**.
-- Status: **E3 FECHADA / E4 AINDA NÃO INICIADA**.
+- Etapa atual: **E4 — Fundação Vercel + Supabase / preflight**.
+- Status: **E4 PREFLIGHT CONCLUÍDO / PROVISIONING NÃO INICIADO**.
 - Pattern B: workspaces isolados por agente + missão, com contexto explícito por handoff.
-- Próximo marco: **E4 — Fundação Vercel + Supabase**, preservando HUMAN_GATE para autenticação, secrets, billing/contrato e publicação externa quando aplicável.
+- Preflight: Vercel/Supabase conectados foram inspecionados em read-only; nenhum recurso externo foi criado.
+- Próximo gate: LEANDRO escolhe a organização Supabase; em seguida custo é consultado/confirmado antes de qualquer criação.
