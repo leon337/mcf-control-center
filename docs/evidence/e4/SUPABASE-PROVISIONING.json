@@ -1,0 +1,24 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "organizationId": "lkjxqlllmbsovatsapfr",
+  "projectId": "kxftpqiwqjzjreqtvetn",
+  "projectName": "mcf-control-center",
+  "region": "sa-east-1",
+  "status": "ACTIVE_HEALTHY",
+  "costMonthlyUsd": 0,
+  "apiUrl": "https://kxftpqiwqjzjreqtvetn.supabase.co",
+  "pausedProject": {
+    "projectId": "exwtngpwqgkrkoszpgib",
+    "name": "estoque-mercearia",
+    "status": "INACTIVE",
+    "authorizedBy": "LEANDRO"
+  },
+  "untouchedProject": "cognitive-ledger",
+  "migrations": [
+    "20260903013522_e4_create_ingest_ledger",
+    "20260903013650_e4_harden_ingest_ledger"
+  ],
+  "appendOnlyTdd": "PASS",
+  "rlsDefaultDeny": true,
+  "publicDeployment": "NOT_STARTED"
+}
