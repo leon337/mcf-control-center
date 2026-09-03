@@ -120,9 +120,9 @@ Transformar os artefatos vivos do WorkBuddy em um cockpit operacional real do MC
 ## Estado atual
 
 - Etapa concluída: **E3 — Arquitetura do MCF Control Center**.
-- Etapa atual: **E4 — Fundação Vercel + Supabase / provisioning**.
-- Status: **SUPABASE PROVISIONADO / LEDGER MÍNIMO APLICADO / VERCEL NÃO PUBLICADO**.
+- Etapa atual: **E4 — Fundação Vercel + Supabase / shell Next.js validado localmente**.
+- Status: **LOCAL_VALIDATION_PASS / AWAITING VERCEL DEPLOY HUMAN_GATE**.
 - Pattern B: workspaces isolados por agente + missão, com contexto explícito por handoff.
-- Supabase: `mcf-control-center` ativo em `sa-east-1`; migrations de ledger append-only e hardening aplicadas e testadas.
-- Free plan: `estoque-mercearia` pausado com autorização de LEANDRO para liberar a vaga; `cognitive-ledger` preservado.
-- Próximo gate: preparar Vercel e environments; qualquer deploy/public URL permanece sujeito ao HUMAN_GATE de LEANDRO.
+- Supabase: projeto `mcf-control-center` ativo em `sa-east-1`, ledger mínimo aplicado e validado.
+- Web shell: Next.js local com baselines preservados, build/testes/smoke visual aprovados.
+- Próximo gate: LEANDRO autorizar ou negar o primeiro deploy/public URL na Vercel.

@@ -1,6 +1,6 @@
 # E4 — Next.js Control Center Shell Design
 
-Status: `SPEC_APPROVED_BY_LEANDRO / IMPLEMENTATION_PLAN_READY`
+Status: `LOCAL_IMPLEMENTATION_VALIDATED / VERCEL_DEPLOY_HUMAN_GATE`
 Mission: `MCF-CONTROL-CENTER-001`
 Authority: LEANDRO remains final HUMAN_GATE.
 
@@ -184,3 +184,5 @@ LEANDRO approved the recommended approach: one Next.js shell that preserves the 
 The selected approach is preferred over Vite + separate Functions or raw HTML + ad-hoc Functions because it keeps routing, server APIs, testing, Vercel deployment, and later VPS migration in one coherent application boundary.
 
 LEANDRO approved this written specification on 2026-09-02 (America/Recife). The implementation plan is versioned at `docs/superpowers/plans/2026-09-03-e4-nextjs-control-center-shell.md`; execution remains pending the selected execution mode.
+
+The approved Next.js shell has passed local implementation validation. External Vercel deployment remains blocked pending a new explicit HUMAN_GATE from LEANDRO.
