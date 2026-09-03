@@ -21,7 +21,7 @@ Local URL: http://127.0.0.1:3100
 - docs/evidence/e4/WEB-SHELL-MISSION-CONTROL-LOCAL.png
 - docs/evidence/e4/WEB-SHELL-GITHUB-LOCAL.png
 
-Capture mechanism: automated Google Chrome headless
+Capture mechanism: automated Google Chrome headless on authorized host (MESTRE)
 
 ## External boundary
 No Vercel Deploy action was executed and no public URL was created by this validation.
