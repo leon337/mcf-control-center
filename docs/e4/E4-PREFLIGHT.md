@@ -8,7 +8,7 @@ Authority: LEANDRO remains final HUMAN_GATE.
 
 - Connected team: `PREDIX AI BR`.
 - Team plan: `hobby`.
-- Projects currently listed in that team: `0`.
+- Authenticated UI shows multiple existing projects in this team; connector project count is not trusted because of the confirmed access anomaly.
 - No Vercel project was created or deployed during this preflight.
 
 ## Supabase — connected-state check
@@ -36,3 +36,12 @@ Vercel project creation/deployment is also kept separate from this preflight. An
 `E4_PREFLIGHT=PASS`
 
 Provisioning has not started. No external resource, secret, database, deployment or public URL was created by this preflight.
+
+## Vercel connector anomaly
+
+- Connector team ID: `team_D45x1LavGkCy2ifRlrShm2WJ`.
+- Local real project `meu-primeiro-agente` has the same `orgId` and project ID `prj_rjN6H62pnhE3CH8bCOx9E7aHKZ3g`.
+- Connector `list_projects(team)` returns `[]`; connector `get_project(real_project_id, same_team)` returns `404`.
+- Authenticated Vercel UI visibly lists multiple projects in `PREDIX AI BR`.
+- Disposition: connector project discovery/read is treated as `UNRELIABLE` for E4. Team metadata may be consulted, but project existence must be verified through authenticated UI and/or local Vercel link metadata until the connection is re-authorized externally.
+- Visual evidence: `docs/evidence/e4/VERCEL-UI-SEARCH-MCF-CONTROL-CENTER.png`.
