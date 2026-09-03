@@ -1,6 +1,6 @@
 # E4 — Next.js Control Center Shell Design
 
-Status: `DESIGN_APPROVED_IN_CHAT / SPEC_PENDING_USER_REVIEW`
+Status: `SPEC_APPROVED_BY_LEANDRO / IMPLEMENTATION_PLAN_READY`
 Mission: `MCF-CONTROL-CENTER-001`
 Authority: LEANDRO remains final HUMAN_GATE.
 
@@ -183,4 +183,4 @@ LEANDRO approved the recommended approach: one Next.js shell that preserves the 
 
 The selected approach is preferred over Vite + separate Functions or raw HTML + ad-hoc Functions because it keeps routing, server APIs, testing, Vercel deployment, and later VPS migration in one coherent application boundary.
 
-Implementation remains pending user review of this written specification and a subsequent implementation plan.
+LEANDRO approved this written specification on 2026-09-02 (America/Recife). The implementation plan is versioned at `docs/superpowers/plans/2026-09-03-e4-nextjs-control-center-shell.md`; execution remains pending the selected execution mode.
