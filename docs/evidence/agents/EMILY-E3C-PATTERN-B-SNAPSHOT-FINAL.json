@@ -1,0 +1,19 @@
+{
+  "sessionId": "session-49b7c915-897a-4f4c-9699-0c0711a651c5",
+  "title": "EMILY — MCF-CONTROL-CENTER-001 — E3C PATTERN-B FINAL AUDIT",
+  "cwd": "/var/tmp/mcf-control-center-001/emily",
+  "agentPreset": "mcf-emily",
+  "permission": "read-only",
+  "running": false,
+  "blank": false,
+  "turns": 1,
+  "steps": 29,
+  "provider": "z-ai",
+  "model": "glm-4.5-flash",
+  "finalAssistantSeq": 7591,
+  "historyHasMore": false,
+  "reviewPath": "docs/reviews/agents/EMILY-E3C-PATTERN-B-FINAL-AUDIT.md",
+  "reviewBytes": 5300,
+  "reviewSha256": "89f59ae13f880c674b48459ac757f88f41d54a8b39db073fd53e742760eacb03",
+  "verdict": "E3_NAO_PODE_FECHAR"
+}

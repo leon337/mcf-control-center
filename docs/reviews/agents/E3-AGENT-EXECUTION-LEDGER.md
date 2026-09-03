@@ -167,3 +167,17 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Final snapshot: `docs/evidence/agents/RAFAEL-E3-PATTERN-B-SNAPSHOT-FINAL.json`.
 - Visual evidence: API-derived `RAFAEL-E3-PATTERN-B-VISUAL-BEFORE.svg` and `RAFAEL-E3-PATTERN-B-VISUAL-FINAL.svg`; no GUI interaction.
 - Disposition: `CANONICAL PATTERN-B — COMPLETE`.
+
+## EMILY — E3C Pattern B final audit — initial verdict challenged
+
+- Session: `session-49b7c915-897a-4f4c-9699-0c0711a651c5`.
+- Workspace: `MCF-CONTROL-CENTER-001 — EMILY`.
+- Preset: `mcf-emily`; permission `read-only`.
+- Provider/model: `z-ai / glm-4.5-flash`.
+- Final assistant seq: `7591`; `running=false`.
+- Exact output: `docs/reviews/agents/EMILY-E3C-PATTERN-B-FINAL-AUDIT.md`.
+- Output SHA-256: `89f59ae13f880c674b48459ac757f88f41d54a8b39db073fd53e742760eacb03`.
+- Visual post-delivery: `docs/evidence/agents/EMILY-E3C-PATTERN-B-WINDOW-FINAL.png`, SHA `87cace025f32b7cdc67fe5c56a5f5578e0d48b4714dccb872c876970980042e8`.
+- Initial verdict: `E3_NAO_PODE_FECHAR`.
+- Disposition: `CHALLENGED — factual contradictions detected against the reconciled contract and canonical enum; verdict is not accepted until a clean revalidation session adjudicates those discrepancies`.
+- Revalidation is required because the initial report claims 42 canonical event types while the frozen enum has 30, treats `PHASE_STARTED`, `PHASE_COMPLETED`, and `HANDOFF_CREATED` as non-canonical although they are present, and attributes draft-only invalid event names to reconciled documents where they no longer occur.
