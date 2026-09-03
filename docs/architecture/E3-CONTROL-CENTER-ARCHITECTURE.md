@@ -1,7 +1,7 @@
 # E3 — MCF Control Center Architecture
 
 Mission: `MCF-CONTROL-CENTER-001`
-Status: `E3_RECONCILED_PENDING_EMILY`
+Status: `E3_CLOSED`
 
 ## Objetivo
 
@@ -157,7 +157,7 @@ VPS + Node/Next + PostgreSQL (ou Supabase self-hosted/compatível)
 
 ## Gates de E3
 
-Para encerrar E3 falta a auditoria final independente da EMILY sobre esta reconciliação. A implementação de infraestrutura continua bloqueada até esse gate documental; controles de exposição/ingest são gates de implementação em E4–E6. O Runtime local exige sessão válida e nenhuma tentativa de contornar autenticação é autorizada.
+A auditoria final independente da EMILY foi concluída e revalidada sem blocker documental aberto; o gate arquitetural de E3 está encerrado. A implementação dos controles continua pertencendo às etapas E4–E6. O Runtime local exige sessão válida e nenhuma tentativa de contornar autenticação é autorizada.
 
 ## E3C — Reconciliação canônica do ledger
 
@@ -284,7 +284,7 @@ Nenhum dado operacional MCF pode ser exposto publicamente antes de Auth/RLS. Nen
 
 ## Gate E3 reconciliado
 
-Antes de marcar E3 como concluída:
+Gate satisfeito para marcar E3 como concluída:
 
 1. parecer Pattern B de SOFIA e RAFAEL com proveniência fechada;
 2. enum `McfEventType` real congelado contra o GitHub canônico;
@@ -293,4 +293,4 @@ Antes de marcar E3 como concluída:
 5. ordering global/gaps/late events reconciliados;
 6. auditoria independente final da EMILY sem blocker aberto.
 
-Até o item 6, E4 permanece `NOT_STARTED`.
+Os seis itens foram cumpridos. E3 está `CLOSED`; E4 permanece `NOT_STARTED` até seu início explícito e verificável.

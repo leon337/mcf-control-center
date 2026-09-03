@@ -117,8 +117,9 @@ Transformar os artefatos vivos do WorkBuddy em um cockpit operacional real do MC
 - estabelecer baseline para futura camada de comando;
 - preparar migração futura para infraestrutura própria.
 
-## Estado inicial
+## Estado atual
 
-- Etapa atual: **E0 — Fundação da missão**
-- Status: **EM EXECUÇÃO**
-- Próximo marco: preservar os dois artefatos originais antes de qualquer alteração.
+- Etapa concluída: **E3 — Arquitetura do MCF Control Center**.
+- Status: **E3 FECHADA / E4 AINDA NÃO INICIADA**.
+- Pattern B: workspaces isolados por agente + missão, com contexto explícito por handoff.
+- Próximo marco: **E4 — Fundação Vercel + Supabase**, preservando HUMAN_GATE para autenticação, secrets, billing/contrato e publicação externa quando aplicável.

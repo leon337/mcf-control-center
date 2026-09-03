@@ -1,7 +1,7 @@
 # MCF Control Event Envelope v1
 
 Mission: `MCF-CONTROL-CENTER-001`
-Status: `E3_RECONCILED_PENDING_EMILY`
+Status: `E3_CLOSED`
 
 Contrato proposto para uma **nova capacidade outbound** do MCF Runtime para o Control Center. O Runtime atual não possui transporte outbound implementado nas fontes auditadas; a emissão será implementada na etapa E6.
 

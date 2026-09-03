@@ -181,3 +181,18 @@ Execution surface: DeepSeek Harness local API (`127.0.0.1:3081`)
 - Initial verdict: `E3_NAO_PODE_FECHAR`.
 - Disposition: `CHALLENGED — factual contradictions detected against the reconciled contract and canonical enum; verdict is not accepted until a clean revalidation session adjudicates those discrepancies`.
 - Revalidation is required because the initial report claims 42 canonical event types while the frozen enum has 30, treats `PHASE_STARTED`, `PHASE_COMPLETED`, and `HANDOFF_CREATED` as non-canonical although they are present, and attributes draft-only invalid event names to reconciled documents where they no longer occur.
+
+## EMILY — E3C factual revalidation — canonical closure audit
+
+- Session: `session-a6933703-b98a-410a-a8b4-e4b921a14dab`.
+- Workspace: `MCF-CONTROL-CENTER-001 — EMILY` (`da88bdfd-f5e6-4830-8f26-a2018b030121`).
+- Preset: `mcf-emily`; permission `read-only`.
+- Provider/model: `nine-router-kiro / kr/claude-sonnet-4.5`.
+- Pre-call gate: `blank=true`, zero user/assistant messages, correct workspace/preset/model/permission.
+- Prompt SHA-256: `cf67dba18ec5f0348508e6e7e5113fa726f49724d6de2fae3e26af229d939f50`.
+- Final assistant seq: `1163`; `running=false`.
+- Exact output: `docs/reviews/agents/EMILY-E3C-FACTUAL-REVALIDATION.md`.
+- Output SHA-256: `0858c99392789243300b5a844c70dcaa91d5d4fa11d2455372e94db665d44fae`.
+- Final visual: `docs/evidence/agents/EMILY-E3C-REVALIDATION-WINDOW-FINAL.png`, SHA `6b496f57b5de63d30524f930a6f09d88cf2dfa6d51cac0aa18fee902aa91721c`.
+- Verdict: `E3_PODE_FECHAR`.
+- Disposition: `CANONICAL CLOSURE AUDIT` — directly revalidated disputed facts against reconciled current sources and explicitly corrected the prior EMILY audit errors.

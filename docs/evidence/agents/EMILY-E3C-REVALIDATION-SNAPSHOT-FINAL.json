@@ -1,0 +1,20 @@
+{
+  "sessionId": "session-a6933703-b98a-410a-a8b4-e4b921a14dab",
+  "title": "EMILY — MCF-CONTROL-CENTER-001 — E3C FACTUAL REVALIDATION",
+  "workspaceId": "da88bdfd-f5e6-4830-8f26-a2018b030121",
+  "cwd": "/var/tmp/mcf-control-center-001/emily",
+  "agentPreset": "mcf-emily",
+  "permission": "read-only",
+  "running": false,
+  "blank": false,
+  "turns": 1,
+  "steps": 6,
+  "provider": "nine-router-kiro",
+  "model": "kr/claude-sonnet-4.5",
+  "finalAssistantSeq": 1163,
+  "historyHasMore": false,
+  "reviewPath": "docs/reviews/agents/EMILY-E3C-FACTUAL-REVALIDATION.md",
+  "reviewBytes": 8002,
+  "reviewSha256": "0858c99392789243300b5a844c70dcaa91d5d4fa11d2455372e94db665d44fae",
+  "verdict": "E3_PODE_FECHAR"
+}
