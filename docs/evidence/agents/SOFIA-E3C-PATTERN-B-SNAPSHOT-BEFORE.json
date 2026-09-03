@@ -1,0 +1,19 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3C",
+  "pattern": "B",
+  "agent": "SOFIA",
+  "workspaceId": "81cc5ad0-e681-4fb9-b4ab-b5cc91a80faa",
+  "workspacePath": "/var/tmp/mcf-control-center-001/sofia",
+  "sessionId": "session-7c6fe628-cbe2-4d14-b493-2d82b1686a84",
+  "preset": "mcf-sofia",
+  "blank": true,
+  "running": false,
+  "permission": "read-only",
+  "provider": "nine-router-kiro",
+  "model": "kr/claude-sonnet-4.5",
+  "packetManifestSha256": "eab0704eee3c87c8baf7b4a0a6f9e4b0cadb1048362bf231dc0f6cb5f6a662ba",
+  "promptSha256": "f6adba7b5700a754a6de89ef636d3ac558d35ec5d982b6df1dd4c1b90f613337",
+  "promptSent": false,
+  "evidenceKind": "API-derived pre-call snapshot"
+}

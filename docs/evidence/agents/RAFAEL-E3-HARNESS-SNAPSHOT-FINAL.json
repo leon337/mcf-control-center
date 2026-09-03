@@ -1,0 +1,19 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B",
+  "agent": "RAFAEL",
+  "canonical": true,
+  "sessionId": "session-339b756b-3e3a-4e4f-8e49-a83d917c5232",
+  "preset": "mcf-rafael",
+  "title": "RAFAEL — MCF-CONTROL-CENTER-001 — E3 — OFFICIAL HANDOFF",
+  "running": false,
+  "blank": false,
+  "cwd": "/tmp/mcf-control-center-e3-rafael",
+  "provider": "nvidia-nim",
+  "model": "deepseek-ai/deepseek-v4-flash-0731",
+  "finalAssistantSeq": 4644,
+  "reviewFile": "docs/reviews/agents/RAFAEL-E3-ENGINEERING-REVIEW.md",
+  "reviewSha256": "bbe49a48ffceee9ad6a31660d27c9b7312fe7bdf29f08bd569564c8d88b66be0",
+  "alternateSession": "session-648426d3-528f-447a-9bea-bf00144ed70f",
+  "alternateDisposition": "preserved but not canonical"
+}

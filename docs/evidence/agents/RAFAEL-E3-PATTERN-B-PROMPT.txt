@@ -1,0 +1,15 @@
+RAFAEL — MCF-CONTROL-CENTER-001 / E3 Pattern B engineering closure.
+
+Você está em revisão READ-ONLY. Use somente os arquivos deste workspace sob input/ e este prompt. Não altere arquivos, não solicite write e entregue o parecer apenas no chat.
+
+Leia primeiro input/00-MISSION.md, input/10-BASELINE.md, input/20-HANDOFF.md e as fontes permitidas em input/sources/. Em particular, trate LEO-E3-PROJECTION-SEMANTICS.md e SOFIA-E3-PROJECTION-WORKSHOP-REVIEW.md como opiniões a reconciliar contra as fontes reais do Runtime, não como fatos automáticos.
+
+Feche apenas as questões de engenharia/schema/contrato necessárias para E3:
+1. PK mcf_events.id versus sequence e mapping eventId/sourceSequence.
+2. Idempotência de ingest, ordering, out-of-order e gaps, separando garantias reais do Runtime de regras novas do Control Center.
+3. Semântica implementável de LIVE/STALE/DEGRADED/UNKNOWN, inclusive clock skew.
+4. TTL, retenção e particionamento: o que é requisito E3, o que é decisão do Control Center e o que deve ficar para depois.
+5. Mudanças mínimas obrigatórias em MCF-CONTROL-EVENT-v1.md e E3-CONTROL-CENTER-ARCHITECTURE.md.
+6. Divergências LÉO x SOFIA: aceite, rejeite ou corrija cada ponto material com evidência.
+
+Formato de saída: resumo executivo; decisões canônicas propostas; tabela/itens LÉO x SOFIA; mudanças exatas de contrato/arquitetura; riscos/gaps; blockers para fechar E3; handoff objetivo ao MESTRE. Não invente capacidade ausente nas fontes.

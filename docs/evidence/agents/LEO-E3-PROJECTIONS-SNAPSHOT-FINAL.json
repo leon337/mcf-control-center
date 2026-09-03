@@ -1,0 +1,14 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B-remediation",
+  "agent": "LÉO",
+  "canonical": true,
+  "sessionId": "session-f291a842-c703-4f22-9723-6e699395d782",
+  "preset": "mcf-leo",
+  "provider": "z-ai",
+  "model": "glm-4.7-flash",
+  "finalAssistantSeq": 5220,
+  "reviewFile": "docs/reviews/agents/LEO-E3-PROJECTION-SEMANTICS.md",
+  "reviewSha256": "3ef0bcce45bb55a31d87f926b3cc13c84d99ab55bc677a0014f157d75ab83609",
+  "running": false
+}

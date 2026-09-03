@@ -1,0 +1,15 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3C",
+  "agent": "SOFIA",
+  "sessionId": "session-a48ef80d-bfe7-45d9-8f9b-b64221dd81bb",
+  "disposition": "INVALID — permission command misrouted through session.prompt",
+  "intendedAction": "set permission read-only before cognitive prompt",
+  "observedAfterMisroute": {
+    "blank": false,
+    "permission": "workspace-write"
+  },
+  "cognitiveTaskSent": false,
+  "currentSessionListPresence": false,
+  "reason": "The slash command was sent through session.prompt instead of commands/execute, causing content entry and failing the blank+read-only gate. Session was excluded before the actual SOFIA task."
+}

@@ -1,0 +1,93 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "gate": "PATTERN_B_LIVE_GATE",
+  "result": "PASS",
+  "workspaces": {
+    "SOFIA": {
+      "workspaceId": "81cc5ad0-e681-4fb9-b4ab-b5cc91a80faa",
+      "title": "MCF-CONTROL-CENTER-001 — SOFIA",
+      "path": "/var/tmp/mcf-control-center-001/sofia",
+      "sessionIds": [
+        "session-7c6fe628-cbe2-4d14-b493-2d82b1686a84",
+        "session-0ca3caf9-67de-4217-8f74-e9c690bef8b1"
+      ],
+      "sessions": [
+        {
+          "sessionId": "session-7c6fe628-cbe2-4d14-b493-2d82b1686a84",
+          "title": "SOFIA — MCF-CONTROL-CENTER-001 — E3C PATTERN-B",
+          "cwd": "/var/tmp/mcf-control-center-001/sofia",
+          "agentPreset": "mcf-sofia",
+          "running": false,
+          "permission": "read-only"
+        },
+        {
+          "sessionId": "session-0ca3caf9-67de-4217-8f74-e9c690bef8b1",
+          "title": "Switch to read-only permission mode",
+          "cwd": "/var/tmp/mcf-control-center-001/sofia",
+          "agentPreset": "mcf-sofia",
+          "running": false,
+          "permission": "workspace-write"
+        }
+      ]
+    },
+    "LÉO": {
+      "workspaceId": "a11f11fd-d1c2-4431-a53e-f5529e25bdc8",
+      "title": "MCF-CONTROL-CENTER-001 — LÉO",
+      "path": "/var/tmp/mcf-control-center-001/leo",
+      "sessionIds": [],
+      "sessions": []
+    },
+    "RAFAEL": {
+      "workspaceId": "946f8704-60a9-432b-9512-60f275a9e9ec",
+      "title": "MCF-CONTROL-CENTER-001 — RAFAEL",
+      "path": "/var/tmp/mcf-control-center-001/rafael",
+      "sessionIds": [
+        "session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f"
+      ],
+      "sessions": [
+        {
+          "sessionId": "session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f",
+          "title": "RAFAEL — MCF-CONTROL-CENTER-001 — E3 PATTERN-B CLOSURE",
+          "cwd": "/var/tmp/mcf-control-center-001/rafael",
+          "agentPreset": "mcf-rafael",
+          "running": false,
+          "permission": "read-only"
+        }
+      ]
+    },
+    "RICARDO": {
+      "workspaceId": "a9759b23-c650-4437-9358-4d183a135956",
+      "title": "MCF-CONTROL-CENTER-001 — RICARDO",
+      "path": "/var/tmp/mcf-control-center-001/ricardo",
+      "sessionIds": [],
+      "sessions": []
+    },
+    "EMILY": {
+      "workspaceId": "da88bdfd-f5e6-4830-8f26-a2018b030121",
+      "title": "MCF-CONTROL-CENTER-001 — EMILY",
+      "path": "/var/tmp/mcf-control-center-001/emily",
+      "sessionIds": [
+        "session-a6933703-b98a-410a-a8b4-e4b921a14dab",
+        "session-49b7c915-897a-4f4c-9699-0c0711a651c5"
+      ],
+      "sessions": [
+        {
+          "sessionId": "session-a6933703-b98a-410a-a8b4-e4b921a14dab",
+          "title": "EMILY — MCF-CONTROL-CENTER-001 — E3C FACTUAL REVALIDATION",
+          "cwd": "/var/tmp/mcf-control-center-001/emily",
+          "agentPreset": "mcf-emily",
+          "running": false,
+          "permission": "read-only"
+        },
+        {
+          "sessionId": "session-49b7c915-897a-4f4c-9699-0c0711a651c5",
+          "title": "EMILY — MCF-CONTROL-CENTER-001 — E3C PATTERN-B FINAL AUDIT",
+          "cwd": "/var/tmp/mcf-control-center-001/emily",
+          "agentPreset": "mcf-emily",
+          "running": false,
+          "permission": "read-only"
+        }
+      ]
+    }
+  }
+}

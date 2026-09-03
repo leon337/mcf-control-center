@@ -1,0 +1,82 @@
+{
+    "type": "server-response",
+    "rpcId": "baseline-workspace-1",
+    "result": {
+        "ok": true,
+        "value": {
+            "items": [
+                {
+                    "workspaceId": "dc426e8f-21b7-441f-a639-2e1957a42db8",
+                    "path": "/var/lib/sentinelx/mcf-labs/leo-deepseek-harness/workspaces/multiagent-collaboration-framework",
+                    "title": "MCF \u2014 L\u00c9O CAN\u00d4NICO",
+                    "sessionIds": [
+                        "session-86fe1c83-eed3-417b-bdd9-8c30135439bf",
+                        "session-62814b50-18f9-48c0-89e8-2fe43b9d669c",
+                        "session-c74c237f-5d8a-46d0-bf91-787270b60db7",
+                        "session-534d22a0-731b-4053-aac8-656e81dafe67",
+                        "session-254e7280-116d-46ef-ac33-20212196bc8c",
+                        "session-81863371-b138-4150-8788-d4a8aa029dd1",
+                        "session-20d0e430-41d0-4140-b3a3-18588b54a633",
+                        "session-457dcf91-7bf1-4b20-ab68-2ea609bd44f7",
+                        "session-47c82534-d4e4-4b3a-adc8-63581c87e492",
+                        "session-55491372-f9b2-4d5a-9c36-7090b603b1d5",
+                        "session-3bce1d32-4997-4cfa-97b6-226c91fa3494",
+                        "session-c8af142c-3d20-4323-8659-4c3bcdc3eae0",
+                        "session-092ccabe-2efb-497b-8892-09cc39a4316d",
+                        "session-59a5b187-e592-47ad-af72-7266081af402",
+                        "session-d9fc7627-8cf2-4829-a95d-5bd0e237fb32",
+                        "session-d8ee3d96-c7df-46cf-8c1b-f864bc20013a",
+                        "session-15df87ac-c027-4461-83da-c28fd4afa76d",
+                        "session-e58a5a81-aaff-492c-a158-f673fc41f753",
+                        "session-fce19652-b3e2-443a-ba28-3e9c3f3b833a",
+                        "session-44f8ec2b-986e-4a43-96fc-df3335563a6e",
+                        "session-69b69616-8ac3-43aa-bc6e-a3ca82ea9e67",
+                        "session-240c4541-e50f-4387-8de0-10579c7187d1",
+                        "session-8d323fbd-aa98-414b-ac1e-3e342db40926",
+                        "session-e9723118-4cb4-4186-98cf-67367567e1b4",
+                        "session-bfc59ae8-0b65-4fd1-b394-fe7286ccf3ad",
+                        "session-5612d9fa-a7b4-45b5-8cdd-d4bd90fa5446",
+                        "session-d184b545-9632-443d-a83f-6c9d78f5f8d0",
+                        "session-8258defd-fa14-40f1-98c5-4885a7158c07",
+                        "session-2443f6d0-1f13-46e9-99b9-2d321ef89be3",
+                        "session-e348a0a2-8e5e-4674-b245-cf68ba78a714",
+                        "session-6331d2b4-d9fc-47ab-a2e3-af617f32c641",
+                        "session-18cab46d-7772-4be5-804a-50efa9d278f3",
+                        "session-9786cbd6-733b-48be-9bf7-8c6c224ddd50"
+                    ],
+                    "createdAt": "2026-08-26T11:16:31.520Z",
+                    "updatedAt": "2026-09-01T01:54:46.423Z"
+                }
+            ],
+            "archivedSessionIds": [
+                "session-f02e7d5e-2352-4530-b7a2-4f1d7f93e6a9",
+                "session-c1868f4b-01aa-4707-90aa-a1156bf3432f",
+                "session-13bac2d8-39b3-426a-a379-7e6c1e7ff3df",
+                "session-982934a9-a560-41c6-b96c-581fb9e8f281",
+                "session-ecad2ebc-9dd7-4012-a4b8-f4fb97a07dd5",
+                "session-076a3f48-d260-46e7-aa71-73b7dff816da",
+                "session-f4dcff4d-e34f-403d-938b-359d164f190b",
+                "session-865e122d-d72e-4b04-844c-6161cb62f1e9",
+                "session-1d436eb3-b737-4775-834e-973610899fc2",
+                "session-9786cbd6-733b-48be-9bf7-8c6c224ddd50",
+                "session-6331d2b4-d9fc-47ab-a2e3-af617f32c641",
+                "session-fce19652-b3e2-443a-ba28-3e9c3f3b833a",
+                "session-e58a5a81-aaff-492c-a158-f673fc41f753",
+                "session-15df87ac-c027-4461-83da-c28fd4afa76d",
+                "session-d8ee3d96-c7df-46cf-8c1b-f864bc20013a",
+                "session-d9fc7627-8cf2-4829-a95d-5bd0e237fb32",
+                "session-59a5b187-e592-47ad-af72-7266081af402",
+                "session-092ccabe-2efb-497b-8892-09cc39a4316d",
+                "session-c8af142c-3d20-4323-8659-4c3bcdc3eae0",
+                "session-55491372-f9b2-4d5a-9c36-7090b603b1d5",
+                "session-47c82534-d4e4-4b3a-adc8-63581c87e492",
+                "session-457dcf91-7bf1-4b20-ab68-2ea609bd44f7",
+                "session-81863371-b138-4150-8788-d4a8aa029dd1",
+                "session-254e7280-116d-46ef-ac33-20212196bc8c",
+                "session-534d22a0-731b-4053-aac8-656e81dafe67",
+                "session-c74c237f-5d8a-46d0-bf91-787270b60db7",
+                "session-62814b50-18f9-48c0-89e8-2fe43b9d669c"
+            ]
+        }
+    }
+}

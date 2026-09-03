@@ -1,0 +1,86 @@
+{
+  "schema": "mcf.pattern-b.agent-precall.v1",
+  "capturedAt": "2026-09-02T23:27:51.862746+00:00",
+  "mission": "MCF-CONTROL-CENTER-001",
+  "agent": "RAFAEL",
+  "stage": "E3 PATTERN-B CLOSURE",
+  "promptSent": false,
+  "workspaceId": "946f8704-60a9-432b-9512-60f275a9e9ec",
+  "workspacePath": "/var/tmp/mcf-control-center-001/rafael",
+  "workspaceTitle": "MCF-CONTROL-CENTER-001 — RAFAEL",
+  "sessionId": "session-94f1bee4-9cc9-4a28-af07-b06e3ab5598f",
+  "cwd": "/var/tmp/mcf-control-center-001/rafael",
+  "agentPreset": "mcf-rafael",
+  "blank": true,
+  "running": false,
+  "permission": "read-only",
+  "turns": 0,
+  "providerModel": {
+    "provider": "nvidia-nim",
+    "model": "deepseek-ai/deepseek-v4-flash-0731"
+  },
+  "manifestSha256": "edbbdb757904e2c3a3b6f39cd1d6c4870a33c0dd7bd24932522fa04a7a2f9170",
+  "promptSha256": "cd724ffd067223db1c8ba3e72ce6fa40467e5e26f544578625d7a67cf7e5ed8a",
+  "packetFiles": [
+    {
+      "path": "input/00-MISSION.md",
+      "sha256": "f43186baf85f0cfaaefa29e9b3a23eba51be52f48598f05363cefe2d2576c09a",
+      "bytes": 478
+    },
+    {
+      "path": "input/10-BASELINE.md",
+      "sha256": "d3242f6ad040ae7825d6d3cfac0011f14ebdb63b5d551c16d49671ce50b8314b",
+      "bytes": 270
+    },
+    {
+      "path": "input/20-HANDOFF.md",
+      "sha256": "51b4f181a128abb4994894d84d64423df1902c3514fe999ebf06903bc4df88cc",
+      "bytes": 925
+    },
+    {
+      "path": "input/sources/E3-CONTROL-CENTER-ARCHITECTURE.md",
+      "sha256": "892783008a49d68b7e1103afd4f5ced55243247f78f783034d2dc6d817a62b75",
+      "bytes": 4672
+    },
+    {
+      "path": "input/sources/LEO-E3-PROJECTION-SEMANTICS.md",
+      "sha256": "3ef0bcce45bb55a31d87f926b3cc13c84d99ab55bc677a0014f157d75ab83609",
+      "bytes": 14270
+    },
+    {
+      "path": "input/sources/MCF-CONTROL-EVENT-v1.md",
+      "sha256": "6ffff93d674384a001422a393e2cfa456ddded5d159db41911fe14de4646541c",
+      "bytes": 1940
+    },
+    {
+      "path": "input/sources/MCF-RUNTIME-0013.sql",
+      "sha256": "f243a02e5908d9df87da62eb9a3511c0b47045ca8c4a3dbb3410f229b3245322",
+      "bytes": 3417
+    },
+    {
+      "path": "input/sources/MISSION-MCF-CONTROL-CENTER-001.md",
+      "sha256": "c01c656f041662b1084c47a6842c6d9c3eb7ca5726675a41acdc517dd89b3cac",
+      "bytes": 4801
+    },
+    {
+      "path": "input/sources/SOFIA-E3-PROJECTION-WORKSHOP-REVIEW.md",
+      "sha256": "dc0d56e70c2bba5620ecfe3f16cd9dadb6f9a0000e0244825380f86f28945253",
+      "bytes": 24621
+    },
+    {
+      "path": "input/sources/mcf-runtime.repository.ts",
+      "sha256": "9ac73c96975256b80d4ba4a65dee431e5e42afc65b1a5b8c52b7b2b943108a3a",
+      "bytes": 3450
+    },
+    {
+      "path": "input/sources/mission-observability.service.ts",
+      "sha256": "c09a6b262f17164dda4599ebb8ed394a40d7d2459519627ebdd23343337c7a23",
+      "bytes": 10654
+    },
+    {
+      "path": "input/sources/postgres-mcf-runtime.repository.ts",
+      "sha256": "dc601231e8ed911f8d0fecba32f4daebaa1bdaaee6638ddea1fd4e793d19e2cf",
+      "bytes": 21444
+    }
+  ]
+}

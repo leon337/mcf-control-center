@@ -1,0 +1,13 @@
+EMILY — E3C FACTUAL REVALIDATION.
+
+Audite novamente o fechamento E3, em modo adversarial e somente leitura, sem defender o seu parecer anterior. Leia primeiro `input/30-REVALIDATION-CHALLENGE.md`, depois confronte diretamente `input/sources/MCF-EVENT-TYPES-main-0825bbc.md`, `input/sources/MCF-CONTROL-EVENT-v1.md`, `input/sources/E3-CONTROL-CENTER-ARCHITECTURE.md` e `input/sources/MESTRE-E3C-RECONCILIATION.md`.
+
+Requisitos obrigatórios:
+1. conte você mesma os valores do enum e cite os nomes relevantes;
+2. confirme por busca/leitura se os nomes antigos de draft ainda existem nos documentos reconciliados atuais;
+3. diferencie campo nativo de `mcf_events` de campo derivado opcional do envelope;
+4. trate pareceres históricos (LÉO/SOFIA/RAFAEL e sua auditoria anterior) como opinião, não como fonte superior aos documentos reconciliados atuais;
+5. não escreva/modifique arquivos e não peça permissão de escrita;
+6. entregue tabela `afirmação anterior → fonte atual → correta/incorreta`, findings remanescentes por severidade, blockers reais (se houver), correções exatas e um único veredito binário final: `E3_PODE_FECHAR` ou `E3_NAO_PODE_FECHAR`.
+
+Se a sua auditoria anterior estiver factualmente errada, declare isso explicitamente e explique a causa provável com base no que você leu nesta sessão. Se ainda houver blocker, prove-o citando o documento reconciliado atual e a linha/trecho correspondente.

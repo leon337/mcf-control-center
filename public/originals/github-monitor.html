@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GitPulse — leon337/multiagent-collaboration-framework</title>
+<style>
+  :root {
+    --bg-0: #0a0e1a;
+    --bg-1: #11172a;
+    --bg-2: #18203a;
+    --bg-3: #1f2a47;
+    --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.16);
+    --ink-0: #e8edf6;
+    --ink-1: #aab4c8;
+    --ink-2: #6f7d96;
+    --ink-3: #4a546b;
+    --accent: #6e7bff;
+    --accent-glow: #8b97ff;
+    --green: #3ddc97;
+    --orange: #ffb547;
+    --red: #ff6b6b;
+    --purple: #b886ff;
+    --cyan: #5fd5f5;
+    --pink: #ff7eb6;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-0);
+    color: var(--ink-0);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .bg-glow {
+    position: fixed;
+    top: -200px;
+    left: 30%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(110,123,255,0.12), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow-2 {
+    position: fixed;
+    bottom: -250px;
+    right: 10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(95,213,245,0.08), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Topbar */
+  .topbar {
+    border-bottom: 1px solid var(--line);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    background: rgba(10,14,26,0.85);
+    backdrop-filter: blur(14px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6e7bff 0%, #b886ff 100%);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 800;
+    font-size: 16px;
+    box-shadow: 0 0 24px rgba(110,123,255,0.4);
+    position: relative;
+  }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    font-size: 11px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .repo-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+    margin-left: 8px;
+    cursor: pointer;
+  }
+  .repo-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--ink-1);
+  }
+  .repo-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .repo-name .user { color: var(--ink-2); }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid rgba(61,220,151,0.3);
+    background: rgba(61,220,151,0.08);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  .btn {
+    border: 1px solid var(--line-strong);
+    background: rgba(255,255,255,0.02);
+    color: var(--ink-0);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 120ms;
+  }
+  .btn:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.24);
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #6e7bff, #8b97ff);
+    border: none;
+    color: white;
+    font-weight: 600;
+  }
+  .btn.primary:hover {
+    background: linear-gradient(135deg, #7a87ff, #97a3ff);
+  }
+  .btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Main layout */
+  .main {
+    flex: 1;
+    padding: 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .page-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-2);
+    flex-wrap: wrap;
+  }
+
+  .rate-limit {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    background: var(--bg-2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
+  .rate-limit.warn { color: var(--orange); }
+  .rate-limit.danger { color: var(--red); }
+
+  /* KPI Grid */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .kpi {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+    background: var(--bg-1);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+  .kpi.c1::before { background: linear-gradient(90deg, var(--accent), var(--accent-glow)); }
+  .kpi.c2::before { background: linear-gradient(90deg, var(--green), #5fe8b0); }
+  .kpi.c3::before { background: linear-gradient(90deg, var(--orange), #ffcc70); }
+  .kpi.c4::before { background: linear-gradient(90deg, var(--purple), #d0a3ff); }
+  .kpi.c5::before { background: linear-gradient(90deg, var(--cyan), #8fe0f5); }
+  .kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-2);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .kpi-value {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink-0);
+    line-height: 1;
+    margin: 0;
+  }
+  .kpi-meta {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .delta {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .delta.warn { color: var(--orange); }
+  .delta.down { color: var(--red); }
+  .spark {
+    margin-top: 10px;
+    height: 28px;
+  }
+  .kpi-loading {
+    color: var(--ink-3);
+    font-size: 20px;
+  }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.02);
+    font-size: 12px;
+    color: var(--ink-1);
+    font-family: var(--mono);
+    transition: all 150ms;
+  }
+  .filter-chip:hover {
+    border-color: rgba(110,123,255,0.4);
+    color: var(--ink-0);
+  }
+  .filter-chip.active {
+    background: rgba(110,123,255,0.12);
+    border-color: rgba(110,123,255,0.5);
+    color: var(--accent-glow);
+  }
+
+  /* Two column main */
+  .grid-main {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+  .grid-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--bg-1);
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-head {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    background: rgba(110,123,255,0.12);
+    color: var(--accent-glow);
+    border-radius: 10px;
+    font-weight: 700;
+  }
+  .panel-sub {
+    font-size: 11px;
+    color: var(--ink-2);
+    margin: 2px 0 0;
+  }
+  .panel-body {
+    padding: 4px 0;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .panel-body.no-pad { padding: 0; }
+
+  /* Activity list */
+  .feed {
+    display: flex;
+    flex-direction: column;
+  }
+  .feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    transition: background 150ms;
+    cursor: pointer;
+    position: relative;
+  }
+  .feed-item:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .feed-item.new {
+    animation: slideIn 350ms ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); background: rgba(110,123,255,0.08); }
+    to { opacity: 1; transform: translateX(0); background: transparent; }
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .feed-icon.commit { background: rgba(61,220,151,0.12); color: var(--green); }
+  .feed-icon.pr-open { background: rgba(255,181,71,0.12); color: var(--orange); }
+  .feed-icon.pr-merged { background: rgba(110,123,255,0.15); color: var(--accent); }
+  .feed-icon.pr-closed { background: rgba(255,107,107,0.12); color: var(--red); }
+  .feed-icon.issue { background: rgba(95,213,245,0.12); color: var(--cyan); }
+  .feed-icon.issue-comment { background: rgba(95,213,245,0.08); color: var(--cyan); }
+  .feed-icon.release { background: rgba(184,134,255,0.15); color: var(--purple); }
+  .feed-icon.star { background: rgba(255,126,182,0.12); color: var(--pink); }
+  .feed-icon.fork { background: rgba(110,123,255,0.12); color: var(--accent-glow); }
+  .feed-icon.watch { background: rgba(110,123,255,0.12); color: var(--accent-glow); }
+  .feed-icon.push { background: rgba(61,220,151,0.12); color: var(--green); }
+  .feed-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .feed-title {
+    font-size: 13px;
+    color: var(--ink-0);
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .feed-title .author { font-weight: 600; color: var(--ink-0); }
+  .feed-title .target { color: var(--accent-glow); font-family: var(--mono); font-size: 12px; }
+  .feed-meta {
+    font-size: 11px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .feed-meta .dot { color: var(--ink-3); }
+  .feed-meta .hash {
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--ink-1);
+    font-size: 10.5px;
+  }
+  .feed-time {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* PR / Issue card */
+  .work-card {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 150ms;
+  }
+  .work-card:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .work-card:last-child { border-bottom: none; }
+  .work-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .state-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .state-chip.open {
+    background: rgba(61,220,151,0.1);
+    color: var(--green);
+    border: 1px solid rgba(61,220,151,0.25);
+  }
+  .state-chip.merged {
+    background: rgba(110,123,255,0.12);
+    color: var(--accent-glow);
+    border: 1px solid rgba(110,123,255,0.3);
+  }
+  .state-chip.closed {
+    background: rgba(255,107,107,0.1);
+    color: var(--red);
+    border: 1px solid rgba(255,107,107,0.25);
+  }
+  .state-chip.draft {
+    background: rgba(170,180,200,0.1);
+    color: var(--ink-2);
+    border: 1px solid rgba(170,180,200,0.2);
+  }
+  .work-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.35;
+    color: var(--ink-0);
+  }
+  .work-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    flex-wrap: wrap;
+  }
+  .work-meta .label {
+    background: var(--bg-3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--ink-1);
+  }
+  .work-meta .comments {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .work-checks {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .check {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+  .check.pass { background: rgba(61,220,151,0.08); color: var(--green); border-color: rgba(61,220,151,0.25); }
+  .check.fail { background: rgba(255,107,107,0.08); color: var(--red); border-color: rgba(255,107,107,0.25); }
+  .check.run { background: rgba(255,181,71,0.08); color: var(--orange); border-color: rgba(255,181,71,0.25); }
+  .check.pending { background: rgba(170,180,200,0.06); color: var(--ink-2); }
+
+  /* Contributors */
+  .contrib-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .contrib-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .contrib-row:last-child { border-bottom: none; }
+  .contrib-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 12px;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-image: var(--avatar-url);
+  }
+  .contrib-avatar .fallback {
+    display: none;
+  }
+  .contrib-avatar.no-img .fallback {
+    display: grid;
+  }
+  .contrib-rank {
+    position: absolute;
+    bottom: -3px;
+    right: -3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--bg-1);
+    border: 1px solid var(--line-strong);
+    font-size: 9px;
+    display: grid;
+    place-items: center;
+    color: var(--ink-1);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+  .contrib-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .contrib-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .contrib-handle {
+    color: var(--ink-2);
+    font-weight: 400;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .contrib-stats {
+    display: flex;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    margin-top: 3px;
+    color: var(--ink-2);
+  }
+  .contrib-bar {
+    width: 80px;
+    height: 4px;
+    background: var(--bg-3);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .contrib-bar > div {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+  }
+
+  /* Releases */
+  .release-row {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .release-row:last-child { border-bottom: none; }
+  .release-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(184,134,255,0.3);
+    background: rgba(184,134,255,0.08);
+    color: var(--purple);
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .release-tag.latest {
+    background: rgba(61,220,151,0.1);
+    color: var(--green);
+    border-color: rgba(61,220,151,0.3);
+  }
+  .release-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .release-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .release-meta {
+    font-size: 11px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+  .release-downloads {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-1);
+    text-align: right;
+  }
+  .release-downloads strong {
+    color: var(--ink-0);
+    display: block;
+    font-size: 14px;
+  }
+
+  /* Activity chart */
+  .chart-panel {
+    padding: 18px;
+  }
+  .chart {
+    height: 160px;
+    width: 100%;
+    display: block;
+  }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .empty-state-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .loading-state {
+    padding: 24px 18px;
+    text-align: center;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .footer {
+    padding: 24px 28px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+  .footer a {
+    color: var(--accent-glow);
+  }
+
+  .error-banner {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.3);
+    color: var(--red);
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    font-size: 13px;
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+  @media (max-width: 1100px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid-main, .grid-side { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .topbar { padding: 12px 16px; flex-wrap: wrap; }
+    .main { padding: 18px 16px; }
+    .kpis { grid-template-columns: 1fr; }
+    .page-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+<div class="app">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div class="brand-text">
+        <div class="brand-name">GitPulse</div>
+        <div class="brand-sub">monitor em tempo real</div>
+      </div>
+    </div>
+    <a class="repo-selector" href="https://github.com/leon337/multiagent-collaboration-framework" target="_blank" rel="noopener">
+      <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1Z"/>
+      </svg>
+      <div class="repo-name">
+        <span class="user">leon337 /</span> multiagent-collaboration-framework
+      </div>
+    </a>
+    <div class="topbar-actions">
+      <span class="rate-limit" id="rate-limit">rate-limit: --</span>
+      <div class="status-pill">
+        <span class="pulse-dot"></span>
+        <span>POLLING ATIVO · 30s</span>
+      </div>
+      <button class="btn" id="btn-refresh">↻ Atualizar agora</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="error-banner" id="error-banner"></div>
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title" id="repo-title">multiagent-collaboration-framework</h1>
+        <p class="page-subtitle" id="repo-desc">Carregando informações do repositório...</p>
+      </div>
+      <div class="page-meta">
+        <span>Última sync: <strong id="last-sync" style="color:var(--ink-1)">--</strong></span>
+        <span style="color:var(--ink-3)">|</span>
+        <span>Linguagem: <strong id="repo-lang" style="color:var(--accent-glow)">--</strong></span>
+        <span style="color:var(--ink-3)">|</span>
+        <span>Branch padrão: <strong id="repo-branch" style="color:var(--ink-1)">--</strong></span>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi c1">
+        <p class="kpi-label">Stars</p>
+        <p class="kpi-value" id="kpi-stars"><span class="kpi-loading">...</span></p>
+        <div class="kpi-meta">
+          <span id="kpi-stars-sub">carregando</span>
+        </div>
+        <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+          <polyline fill="none" stroke="url(#g1)" stroke-width="1.5" points="0,18 12,15 24,12 36,14 48,10 60,8 72,11 84,5 96,3"/>
+          <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#6e7bff"/><stop offset="1" stop-color="#b886ff"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="kpi c2">
+        <p class="kpi-label">Forks</p>
+        <p class="kpi-value" id="kpi-forks"><span class="kpi-loading">...</span></p>
+        <div class="kpi-meta">
+          <span id="kpi-forks-sub">carregando</span>
+        </div>
+        <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+          <polyline fill="none" stroke="url(#g2)" stroke-width="1.5" points="0,20 12,18 24,16 36,15 48,12 60,13 72,9 84,8 96,6"/>
+          <defs><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#3ddc97"/><stop offset="1" stop-color="#5fd5f5"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="kpi c3">
+        <p class="kpi-label">Issues Abertas</p>
+        <p class="kpi-value" id="kpi-issues"><span class="kpi-loading">...</span></p>
+        <div class="kpi-meta">
+          <span id="kpi-issues-sub">carregando</span>
+        </div>
+        <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+          <polyline fill="none" stroke="url(#g3)" stroke-width="1.5" points="0,10 12,14 24,12 36,16 48,18 60,14 72,16 84,20 96,17"/>
+          <defs><linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ffcc70"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="kpi c4">
+        <p class="kpi-label">PRs Abertos</p>
+        <p class="kpi-value" id="kpi-prs"><span class="kpi-loading">...</span></p>
+        <div class="kpi-meta">
+          <span id="kpi-prs-sub">carregando</span>
+        </div>
+        <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+          <polyline fill="none" stroke="url(#g4)" stroke-width="1.5" points="0,22 12,20 24,18 36,16 48,14 60,12 72,10 84,8 96,5"/>
+          <defs><linearGradient id="g4" x1="0" x2="1"><stop offset="0" stop-color="#b886ff"/><stop offset="1" stop-color="#d0a3ff"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="kpi c5">
+        <p class="kpi-label">Commits (30d)</p>
+        <p class="kpi-value" id="kpi-commits"><span class="kpi-loading">...</span></p>
+        <div class="kpi-meta">
+          <span id="kpi-commits-sub">carregando</span>
+        </div>
+        <svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none">
+          <polyline fill="none" stroke="url(#g5)" stroke-width="1.5" points="0,15 12,11 24,13 36,9 48,7 60,10 72,6 84,4 96,2"/>
+          <defs><linearGradient id="g5" x1="0" x2="1"><stop offset="0" stop-color="#5fd5f5"/><stop offset="1" stop-color="#8fe0f5"/></linearGradient></defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-chip active" data-filter="all">Tudo</button>
+      <button class="filter-chip" data-filter="push">Pushes</button>
+      <button class="filter-chip" data-filter="pr">Pull Requests</button>
+      <button class="filter-chip" data-filter="issue">Issues</button>
+      <button class="filter-chip" data-filter="release">Releases</button>
+      <button class="filter-chip" data-filter="watch">Watch/Star</button>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid-main">
+      <!-- Activity feed -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              Feed ao vivo
+              <span class="badge" id="feed-count">0</span>
+            </h3>
+            <p class="panel-sub">Eventos públicos do repositório</p>
+          </div>
+          <span style="font-family:var(--mono); font-size:10.5px; color:var(--green)">● AO VIVO</span>
+        </div>
+        <div class="panel-body">
+          <div class="feed" id="feed">
+            <div class="loading-state">Carregando eventos do GitHub...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pull Requests panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              Pull Requests
+              <span class="badge" id="pr-count">0</span>
+            </h3>
+            <p class="panel-sub">Status e revisões</p>
+          </div>
+        </div>
+        <div class="panel-body" id="prs-body">
+          <div class="loading-state">Carregando PRs...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side grid -->
+    <div class="grid-side">
+      <!-- Contributors -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              Contribuidores
+              <span class="badge" id="contrib-count">0</span>
+            </h3>
+            <p class="panel-sub">Total de contribuições</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="contrib-list" id="contribs">
+            <div class="loading-state">Carregando contribuidores...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Releases -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              Releases
+              <span class="badge">5</span>
+            </h3>
+            <p class="panel-sub">Tags publicadas</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="releases">
+            <div class="loading-state">Carregando releases...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="footer">
+    GitPulse — monitoramento GitHub em tempo real · <a href="https://github.com/leon337/multiagent-collaboration-framework" target="_blank" rel="noopener">leon337/multiagent-collaboration-framework</a>
+  </div>
+</div>
+
+<script>
+// Config
+const REPO = "leon337/multiagent-collaboration-framework";
+const API_BASE = `https://api.github.com/repos/${REPO}`;
+const POLL_INTERVAL = 30000; // 30 segundos
+
+let lastEventId = null;
+let rateLimitRemaining = null;
+let rateLimitReset = null;
+
+// Helpers
+function formatNumber(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + "M";
+  if (n >= 1000) return (n/1000).toFixed(1) + "k";
+  return n.toString();
+}
+
+function formatTimeAgo(isoString) {
+  const now = new Date();
+  const date = new Date(isoString);
+  const seconds = Math.floor((now - date) / 1000);
+  if (seconds < 60) return "agora";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d`;
+  const months = Math.floor(days / 30);
+  return `${months}m`;
+}
+
+function updateRateLimit(headers) {
+  rateLimitRemaining = headers.get("X-RateLimit-Remaining");
+  rateLimitReset = headers.get("X-RateLimit-Reset");
+  const el = document.getElementById("rate-limit");
+  if (rateLimitRemaining !== null) {
+    el.textContent = `rate-limit: ${rateLimitRemaining}`;
+    el.classList.remove("warn", "danger");
+    if (rateLimitRemaining < 10) el.classList.add("danger");
+    else if (rateLimitRemaining < 30) el.classList.add("warn");
+  }
+}
+
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  updateRateLimit(response.headers);
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+// Renderers
+function renderRepoMeta(repo) {
+  document.getElementById("repo-title").textContent = repo.name;
+  document.getElementById("repo-desc").textContent = repo.description || "Sem descrição fornecida";
+  document.getElementById("repo-lang").textContent = repo.language || "N/A";
+  document.getElementById("repo-branch").textContent = repo.default_branch;
+
+  document.getElementById("kpi-stars").innerHTML = formatNumber(repo.stargazers_count);
+  document.getElementById("kpi-forks").innerHTML = formatNumber(repo.forks_count);
+  document.getElementById("kpi-issues").innerHTML = formatNumber(repo.open_issues_count);
+  document.getElementById("kpi-prs").innerHTML = formatNumber(repo.open_issues_count - repo.open_issues_count); // placeholder, will update with PRs
+  document.getElementById("kpi-commits").innerHTML = formatNumber(repo.watchers_count);
+
+  document.getElementById("kpi-stars-sub").textContent = `total`;
+  document.getElementById("kpi-forks-sub").textContent = `total`;
+  document.getElementById("kpi-issues-sub").textContent = `abertas no GitHub`;
+  document.getElementById("kpi-prs-sub").textContent = `calculando...`;
+  document.getElementById("kpi-commits-sub").textContent = `watchers`;
+
+  document.getElementById("last-sync").textContent = new Date().toLocaleTimeString("pt-BR");
+}
+
+function renderEvents(events) {
+  const feed = document.getElementById("feed");
+  if (!events || events.length === 0) {
+    feed.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div>Nenhum evento recente</div>`;
+    return;
+  }
+
+  // Track newest event ID for live updates
+  if (events.length > 0 && events[0].id) {
+    lastEventId = events[0].id;
+  }
+
+  const html = events.slice(0, 12).map(event => {
+    const type = event.type;
+    const actor = event.actor?.login || "unknown";
+    const time = formatTimeAgo(event.created_at);
+
+    let icon = "●";
+    let title = "";
+    let meta = "";
+    let cssClass = type.toLowerCase().replace("event", "");
+
+    if (type === "PushEvent") {
+      const commits = event.payload.commits || [];
+      const firstCommit = commits[0];
+      icon = "⬆";
+      cssClass = "push";
+      title = `<span class="author">${actor}</span> fez push de ${commits.length} commit${commits.length !== 1 ? 's' : ''}`;
+      meta = firstCommit ? `<span class="hash">${firstCommit.sha.slice(0,7)}</span> · ${firstCommit.message.split('\n')[0].slice(0,50)}` : "push";
+    }
+    else if (type === "PullRequestEvent") {
+      const pr = event.payload.pull_request;
+      const action = event.payload.action;
+      if (action === "opened") {
+        icon = "↗"; cssClass = "pr-open";
+        title = `<span class="author">${actor}</span> abriu PR <span class="target">#${pr.number}</span>`;
+        meta = pr.title.slice(0,60);
+      }
+      else if (action === "closed") {
+        const merged = pr.merged_at !== null;
+        icon = merged ? "⇄" : "✕";
+        cssClass = merged ? "pr-merged" : "pr-closed";
+        title = `<span class="author">${actor}</span> ${merged ? 'mergeou' : 'fechou'} PR <span class="target">#${pr.number}</span>`;
+        meta = pr.title.slice(0,60);
+      }
+      else if (action === "reopened") {
+        icon = "↗"; cssClass = "pr-open";
+        title = `<span class="author">${actor}</span> reabriu PR <span class="target">#${pr.number}</span>`;
+        meta = pr.title.slice(0,60);
+      }
+      else {
+        icon = "⇄"; cssClass = "pr-open";
+        title = `<span class="author">${actor}</span> atualizou PR <span class="target">#${pr.number}</span>`;
+        meta = action;
+      }
+    }
+    else if (type === "IssuesEvent") {
+      const issue = event.payload.issue;
+      const action = event.payload.action;
+      if (action === "opened") {
+        icon = "◆"; cssClass = "issue";
+        title = `<span class="author">${actor}</span> abriu issue <span class="target">#${issue.number}</span>`;
+        meta = issue.title.slice(0,60);
+      }
+      else if (action === "closed") {
+        icon = "✕"; cssClass = "issue";
+        title = `<span class="author">${actor}</span> fechou issue <span class="target">#${issue.number}</span>`;
+        meta = issue.title.slice(0,60);
+      }
+      else {
+        icon = "◆"; cssClass = "issue";
+        title = `<span class="author">${actor}</span> ${action} issue <span class="target">#${issue.number}</span>`;
+        meta = issue.title.slice(0,60);
+      }
+    }
+    else if (type === "IssueCommentEvent") {
+      const issue = event.payload.issue;
+      icon = "💬"; cssClass = "issue-comment";
+      title = `<span class="author">${actor}</span> comentou em issue <span class="target">#${issue.number}</span>`;
+      meta = issue.title.slice(0,60);
+    }
+    else if (type === "ReleaseEvent") {
+      const release = event.payload.release;
+      icon = "✓"; cssClass = "release";
+      title = `Nova release: <span class="target">${release.tag_name}</span>`;
+      meta = release.name || release.tag_name;
+    }
+    else if (type === "WatchEvent") {
+      icon = "★"; cssClass = "watch";
+      title = `<span class="author">${actor}</span> marcou como starred`;
+      meta = "watch event";
+    }
+    else if (type === "ForkEvent") {
+      const fork = event.payload.forkee;
+      icon = "⑂"; cssClass = "fork";
+      title = `<span class="author">${actor}</span> fez fork`;
+      meta = fork.full_name;
+    }
+    else if (type === "CreateEvent") {
+      icon = "＋"; cssClass = "commit";
+      title = `<span class="author">${actor}</span> criou ${event.payload.ref_type}`;
+      meta = event.payload.ref || event.payload.ref_type;
+    }
+    else if (type === "DeleteEvent") {
+      icon = "🗑"; cssClass = "pr-closed";
+      title = `<span class="author">${actor}</span> deletou ${event.payload.ref_type}`;
+      meta = event.payload.ref;
+    }
+    else {
+      icon = "●";
+      title = `<span class="author">${actor}</span> · ${type}`;
+      meta = "";
+    }
+
+    return `
+      <div class="feed-item">
+        <div class="feed-icon ${cssClass}">${icon}</div>
+        <div class="feed-body">
+          <p class="feed-title">${title}</p>
+          ${meta ? `<div class="feed-meta">${meta}</div>` : ''}
+        </div>
+        <div class="feed-time">${time}</div>
+      </div>
+    `;
+  }).join("");
+
+  feed.innerHTML = html;
+  document.getElementById("feed-count").textContent = events.length;
+}
+
+function renderPRs(prs) {
+  const body = document.getElementById("prs-body");
+  const openPRs = prs.filter(p => p.state === "open");
+
+  if (openPRs.length === 0) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✓</div>Nenhum PR aberto</div>`;
+    document.getElementById("pr-count").textContent = "0";
+    document.getElementById("kpi-prs").textContent = "0";
+    return;
+  }
+
+  const html = openPRs.slice(0, 8).map(pr => {
+    const stateLabel = pr.draft ? "RASCUNHO" : "ABERTO";
+    const stateClass = pr.draft ? "draft" : "open";
+    const labels = (pr.labels || []).map(l => l.name).slice(0, 3);
+    const labelsHTML = labels.map(l => `<span class="label">${l}</span>`).join("");
+    const days = Math.floor((new Date() - new Date(pr.created_at)) / (1000*60*60*24));
+
+    return `
+      <div class="work-card" onclick="window.open('${pr.html_url}', '_blank')">
+        <div class="work-head">
+          <span class="state-chip ${stateClass}">${stateLabel}</span>
+          <h4 class="work-title">${pr.title}</h4>
+        </div>
+        <div class="work-meta">
+          <span>@${pr.user.login}</span>
+          ${labelsHTML}
+          <span class="comments">💬 ${pr.comments || 0}</span>
+          <span>${days}d</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  body.innerHTML = html;
+  document.getElementById("pr-count").textContent = openPRs.length;
+  document.getElementById("kpi-prs").textContent = openPRs.length;
+  document.getElementById("kpi-prs-sub").textContent = `abertos agora`;
+}
+
+function renderContributors(contributors) {
+  const list = document.getElementById("contribs");
+  if (!contributors || contributors.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">👤</div>Sem contribuidores</div>`;
+    return;
+  }
+
+  const maxContribs = Math.max(...contributors.map(c => c.contributions));
+  const html = contributors.slice(0, 8).map((c, idx) => {
+    const initials = c.login.slice(0, 2).toUpperCase();
+    return `
+      <div class="contrib-row">
+        <div class="contrib-avatar" style="--avatar-url: url('${c.avatar_url}')">
+          <span class="fallback">${initials}</span>
+        </div>
+        <div class="contrib-rank">${idx + 1}</div>
+        <div class="contrib-info">
+          <h4 class="contrib-name">${c.login} <span class="contrib-handle">@${c.login}</span></h4>
+          <div class="contrib-stats">
+            <span>${c.contributions} contribuições</span>
+          </div>
+        </div>
+        <div class="contrib-bar"><div style="width:${(c.contributions / maxContribs) * 100}%"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  list.innerHTML = html;
+  document.getElementById("contrib-count").textContent = contributors.length;
+}
+
+function renderReleases(releases) {
+  const target = document.getElementById("releases");
+  if (!releases || releases.length === 0) {
+    target.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div>Sem releases</div>`;
+    return;
+  }
+
+  const html = releases.slice(0, 5).map((r, idx) => {
+    const isLatest = idx === 0;
+    const timeAgo = formatTimeAgo(r.published_at || r.created_at);
+    return `
+      <div class="release-row" onclick="window.open('${r.html_url}', '_blank')" style="cursor:pointer;">
+        <div class="release-tag ${isLatest ? 'latest' : ''}">${r.tag_name}</div>
+        <div class="release-info">
+          <h4 class="release-name">${r.name || r.tag_name}</h4>
+          <div class="release-meta">${timeAgo} atrás · by ${r.author?.login || 'unknown'}</div>
+        </div>
+        <div class="release-downloads">
+          <strong>${r.assets?.length || 0}</strong>
+          assets
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  target.innerHTML = html;
+}
+
+// Error handling
+function showError(message) {
+  const banner = document.getElementById("error-banner");
+  banner.textContent = `Erro: ${message}`;
+  banner.classList.add("show");
+}
+
+function clearError() {
+  const banner = document.getElementById("error-banner");
+  banner.classList.remove("show");
+}
+
+// Main data fetch
+async function loadAllData() {
+  try {
+    clearError();
+    document.getElementById("btn-refresh").classList.add("loading");
+    document.getElementById("btn-refresh").textContent = "↻ Carregando...";
+
+    // Fetch in parallel
+    const [repo, events, prs, contributors, releases] = await Promise.all([
+      fetchJSON(API_BASE),
+      fetchJSON(`${API_BASE}/events?per_page=20`),
+      fetchJSON(`${API_BASE}/pulls?per_page=20`),
+      fetchJSON(`${API_BASE}/contributors?per_page=10`),
+      fetchJSON(`${API_BASE}/releases?per_page=10`)
+    ]);
+
+    renderRepoMeta(repo);
+    renderEvents(events);
+    renderPRs(prs);
+    renderContributors(contributors);
+    renderReleases(releases);
+
+    document.getElementById("last-sync").textContent = new Date().toLocaleTimeString("pt-BR");
+    document.getElementById("btn-refresh").textContent = "✓ Sincronizado";
+    setTimeout(() => {
+      document.getElementById("btn-refresh").innerHTML = "↻ Atualizar agora";
+      document.getElementById("btn-refresh").classList.remove("loading");
+    }, 1500);
+  }
+  catch (err) {
+    showError(err.message);
+    document.getElementById("btn-refresh").textContent = "↻ Tentar novamente";
+    document.getElementById("btn-refresh").classList.remove("loading");
+  }
+}
+
+// Live polling — fetch only events (lightweight)
+async function pollEvents() {
+  try {
+    const events = await fetchJSON(`${API_BASE}/events?per_page=20`);
+    if (events && events.length > 0 && events[0].id !== lastEventId) {
+      renderEvents(events);
+      document.getElementById("last-sync").textContent = new Date().toLocaleTimeString("pt-BR");
+    }
+  }
+  catch (err) {
+    // Silent fail for polling — don't spam the user with errors
+    console.warn("Polling error:", err);
+  }
+}
+
+// Filters
+document.querySelectorAll(".filter-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    const filter = chip.dataset.filter;
+    document.querySelectorAll(".feed-item").forEach(item => {
+      const typeClass = item.querySelector(".feed-icon").classList[1];
+      if (filter === "all") {
+        item.style.display = "";
+      } else {
+        const map = {
+          "push": ["push", "commit"],
+          "pr": ["pr-open", "pr-merged", "pr-closed", "pullrequest"],
+          "issue": ["issue", "issuecomment", "issues"],
+          "release": ["release"],
+          "watch": ["watch", "star", "fork"]
+        };
+        item.style.display = map[filter]?.some(t => typeClass.includes(t)) ? "" : "none";
+      }
+    });
+  });
+});
+
+// Manual refresh
+document.getElementById("btn-refresh").addEventListener("click", loadAllData);
+
+// Init
+loadAllData();
+setInterval(pollEvents, POLL_INTERVAL);
+</script>
+</body>
+</html>

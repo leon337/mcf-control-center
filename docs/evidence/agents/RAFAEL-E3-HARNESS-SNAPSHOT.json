@@ -1,0 +1,17 @@
+{
+  "captured_at_utc": "2026-09-02T20:14:10.146634+00:00",
+  "mission": "MCF-CONTROL-CENTER-001 / E3",
+  "agent": "RAFAEL",
+  "session_id": "session-339b756b-3e3a-4e4f-8e49-a83d917c5232",
+  "cwd": "/tmp/mcf-control-center-e3-rafael",
+  "agent_preset": "mcf-rafael",
+  "title": "RAFAEL — MCF-CONTROL-CENTER-001 — E3 HANDOFF",
+  "running": true,
+  "provider": "nvidia-nim",
+  "model": "deepseek-ai/deepseek-v4-flash-0731",
+  "request_header_seq": 11,
+  "last_assistant_message_seq": 147,
+  "last_assistant_text_excerpt": "Contrato canônico lido. Agora leio os três artefatos obrigatórios da revisão.\n\n",
+  "prompt_sha256": "15d99925088e33e3e00258860cfccf930986cf69750cd7e30934f7fd5cc832d7",
+  "history_as_of_seq": 3424
+}

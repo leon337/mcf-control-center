@@ -1,0 +1,47 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "pattern": "B",
+  "root": "/var/tmp/mcf-control-center-001",
+  "agents": {
+    "sofia": {
+      "workspacePath": "/var/tmp/mcf-control-center-001/sofia",
+      "manifestSha256": "eab0704eee3c87c8baf7b4a0a6f9e4b0cadb1048362bf231dc0f6cb5f6a662ba",
+      "inputFileCount": 11,
+      "mcfMainSha": "0825bbcfa1c9e8a07c08d9ff7d9ecbcc51186b22",
+      "workspaceMode": "0o755",
+      "allPacketFilesMode0444": true
+    },
+    "leo": {
+      "workspacePath": "/var/tmp/mcf-control-center-001/leo",
+      "manifestSha256": "ec92fd18a8e20350bc5f86fda5b176c57f8204be6867aea260037e20ca96b304",
+      "inputFileCount": 7,
+      "mcfMainSha": "0825bbcfa1c9e8a07c08d9ff7d9ecbcc51186b22",
+      "workspaceMode": "0o755",
+      "allPacketFilesMode0444": true
+    },
+    "rafael": {
+      "workspacePath": "/var/tmp/mcf-control-center-001/rafael",
+      "manifestSha256": "6ce9ccb71004743befadbb16d008217cf2e4f586735b49f5d79824ecfe072984",
+      "inputFileCount": 11,
+      "mcfMainSha": "0825bbcfa1c9e8a07c08d9ff7d9ecbcc51186b22",
+      "workspaceMode": "0o755",
+      "allPacketFilesMode0444": true
+    },
+    "ricardo": {
+      "workspacePath": "/var/tmp/mcf-control-center-001/ricardo",
+      "manifestSha256": "769cad54a959fbfec02e10964b0ad4f684ae22bf63b187d2224392e9d2e6732d",
+      "inputFileCount": 7,
+      "mcfMainSha": "0825bbcfa1c9e8a07c08d9ff7d9ecbcc51186b22",
+      "workspaceMode": "0o755",
+      "allPacketFilesMode0444": true
+    },
+    "emily": {
+      "workspacePath": "/var/tmp/mcf-control-center-001/emily",
+      "manifestSha256": "3410bcfcf592fc12096a5d04c968a1e884ef520d27ff4ba92602f5f1868d069d",
+      "inputFileCount": 8,
+      "mcfMainSha": "0825bbcfa1c9e8a07c08d9ff7d9ecbcc51186b22",
+      "workspaceMode": "0o755",
+      "allPacketFilesMode0444": true
+    }
+  }
+}

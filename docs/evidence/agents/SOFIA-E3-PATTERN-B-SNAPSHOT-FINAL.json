@@ -1,0 +1,42 @@
+{
+  "schema": "mcf.pattern-b.agent-final.v1",
+  "capturedAt": "2026-09-02T23:23:17.531219+00:00",
+  "agent": "SOFIA",
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3C PATTERN-B",
+  "sessionId": "session-7c6fe628-cbe2-4d14-b493-2d82b1686a84",
+  "cwd": "/var/tmp/mcf-control-center-001/sofia",
+  "agentPreset": "mcf-sofia",
+  "running": false,
+  "blank": false,
+  "permission": "read-only",
+  "sessionStats": {
+    "turns": 1,
+    "steps": 4,
+    "llmMs": 150860,
+    "toolMs": 794,
+    "ttftMs": 149281,
+    "ttftSteps": 4,
+    "decodeMs": 1579,
+    "decodeTokens": 6146
+  },
+  "providerModel": {
+    "provider": "nine-router-kiro",
+    "model": "kr/claude-sonnet-4.5"
+  },
+  "workspaceMatches": [
+    {
+      "workspaceId": "81cc5ad0-e681-4fb9-b4ab-b5cc91a80faa",
+      "title": "MCF-CONTROL-CENTER-001 — SOFIA",
+      "path": "/var/tmp/mcf-control-center-001/sofia",
+      "sessionIds": [
+        "session-7c6fe628-cbe2-4d14-b493-2d82b1686a84",
+        "session-0ca3caf9-67de-4217-8f74-e9c690bef8b1"
+      ]
+    }
+  ],
+  "finalAssistantMessageSeq": 2649,
+  "reviewPath": "docs/reviews/agents/SOFIA-E3-PROJECTION-WORKSHOP-REVIEW.md",
+  "reviewSha256": "dc0d56e70c2bba5620ecfe3f16cd9dadb6f9a0000e0244825380f86f28945253",
+  "historyHasMore": false
+}

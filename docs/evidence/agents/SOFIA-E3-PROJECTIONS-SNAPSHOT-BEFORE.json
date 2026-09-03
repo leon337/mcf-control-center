@@ -1,0 +1,12 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B-remediation",
+  "agent": "SOFIA",
+  "sessionId": "session-cc9f372c-193b-4d54-b4c0-ac9d0e6d1273",
+  "preset": "mcf-sofia",
+  "provider": "nine-router-kiro",
+  "model": "kr/claude-sonnet-4.5",
+  "cwd": "/tmp/mcf-control-center-e3-projections-sofia",
+  "promptSent": false,
+  "task": "projection workshop review of LEO against runtime code"
+}

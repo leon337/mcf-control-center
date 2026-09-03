@@ -1,0 +1,94 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B",
+  "agent": "RICARDO",
+  "session": {
+    "sessionId": "session-a7f7588a-c41b-4b6e-aa96-563d6ad8ba1e",
+    "updatedAt": 1788382218457,
+    "running": false,
+    "blank": true,
+    "cwd": "/tmp/mcf-control-center-e3-ricardo-v2",
+    "agentPreset": "mcf-ricardo",
+    "projections": {
+      "asOfSeq": 3,
+      "values": {
+        "sessionStats": {
+          "turns": 0,
+          "steps": 0,
+          "llmMs": 0,
+          "toolMs": 0,
+          "ttftMs": 0,
+          "ttftSteps": 0,
+          "decodeMs": 0,
+          "decodeTokens": 0
+        },
+        "title": "RICARDO — MCF-CONTROL-CENTER-001 — E3 — HANDOFF RAFAEL",
+        "goal": null,
+        "tokenUsage": {
+          "uncachedInputTokens": 0,
+          "outputTokens": 0,
+          "cacheReadTokens": 0,
+          "cacheWriteTokens": 0
+        },
+        "contextPressure": {},
+        "contextBreakdown": {
+          "systemTokens": 0,
+          "toolsTokens": 0,
+          "messageTokens": 0
+        },
+        "subagentTiming": {
+          "settledMs": 0
+        },
+        "subagent": null,
+        "permissions": {
+          "options": [
+            {
+              "value": "read-only",
+              "name": "read-only"
+            },
+            {
+              "value": "workspace-write",
+              "name": "workspace-write"
+            },
+            {
+              "value": "danger-full-access",
+              "name": "danger-full-access"
+            }
+          ],
+          "currentValue": "workspace-write"
+        },
+        "sessionListMetadata": {
+          "blank": true,
+          "lastPromptAt": null
+        },
+        "imageLimits": {
+          "maxImageBytes": 20971520,
+          "maxImagesPerMessage": 20,
+          "maxMessageImageBytes": 209715200,
+          "maxImagePixels": 64000000,
+          "maxImageDimension": 8192,
+          "mediaTypes": [
+            "image/png",
+            "image/jpeg",
+            "image/webp",
+            "image/gif"
+          ]
+        },
+        "todos": null,
+        "plan": {
+          "active": false,
+          "pending": false
+        }
+      }
+    }
+  },
+  "model": {
+    "provider": "z-ai",
+    "model": "glm-4.7-flash"
+  },
+  "routable": true,
+  "promptSent": false,
+  "evidenceKind": "PRE_HANDOFF_API_SNAPSHOT",
+  "promptSha256": "ff71a463feaece8737823976c9a577d3687d891f7682a3b30d7138e8a5d28696",
+  "promptFile": "/tmp/RICARDO-E3-PROMPT.txt"
+}

@@ -1,0 +1,20 @@
+{
+  "sessionId": "session-a6933703-b98a-410a-a8b4-e4b921a14dab",
+  "title": "EMILY — MCF-CONTROL-CENTER-001 — E3C FACTUAL REVALIDATION",
+  "workspaceId": "da88bdfd-f5e6-4830-8f26-a2018b030121",
+  "cwd": "/var/tmp/mcf-control-center-001/emily",
+  "agentPreset": "mcf-emily",
+  "permission": "read-only",
+  "blank": true,
+  "running": false,
+  "provider": "nine-router-kiro",
+  "model": "kr/claude-sonnet-4.5",
+  "historyEvents": 8,
+  "historyHasMore": false,
+  "userMessages": 0,
+  "assistantMessages": 0,
+  "workspaceManifestSha256": "4555953cae3f0358228dfe2ee86982f75f4656600ba25bde9951c5042539715c",
+  "challengeSha256": "3bbad49824bea7cd59cc8b66914dffd4eeccf2c8c8443148cc4f55ac9cf17b36",
+  "visualSha256": "375b68b8b1644e22782d17f8048455e6a43883dd11fb0089ab06d03b820e62e7",
+  "promptSent": false
+}

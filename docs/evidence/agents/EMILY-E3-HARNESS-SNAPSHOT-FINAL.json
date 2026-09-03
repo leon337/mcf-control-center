@@ -1,0 +1,19 @@
+{
+  "mission": "MCF-CONTROL-CENTER-001",
+  "stage": "E3B",
+  "agent": "EMILY",
+  "canonical": true,
+  "sessionId": "session-bb36307a-5935-4c3e-ae3f-67938df0a87f",
+  "preset": "mcf-emily",
+  "title": "EMILY — MCF-CONTROL-CENTER-001 — E3 — OFFICIAL INDEPENDENT AUDIT",
+  "running": false,
+  "blank": false,
+  "cwd": "/tmp/mcf-control-center-e3-emily-v1",
+  "provider": "z-ai",
+  "model": "glm-4.5-flash",
+  "finalAssistantSeq": 3681,
+  "auditFile": "docs/reviews/agents/EMILY-E3-INDEPENDENT-AUDIT.md",
+  "auditSha256": "b520597bf03d2bdf1b690943e42fb18b395d2c2bfc6863a4fda1770f703fadb4",
+  "verdictDetected": "LIBERAR E3 COM REMEDIAÇÃO",
+  "abortedPriorSession": "session-eb7d85d7-8ef0-4b98-bbd3-75d6e1b080f2"
+}
